@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OrderService {
 
+    private static final String ORDER_NOT_FOUND_MSG = "Order not found: ";
+
     private final OrderRepository orderRepository;
     private final UserProfileService userProfileService;
     private final SellerProfileService sellerProfileService;
@@ -101,7 +103,7 @@ public class OrderService {
         log.debug("Fetching order: {}", orderId);
         return orderRepository.findById(orderId)
                 .map(this::mapToDTO)
-                .orElseThrow(() -> new NoSuchElementException("Order not found: " + orderId));
+                .orElseThrow(() -> new NoSuchElementException(ORDER_NOT_FOUND_MSG + orderId));
     }
 
     /**
@@ -165,7 +167,7 @@ public class OrderService {
         log.info("Updating order status - Order: {}, Status: {}", orderId, request.status());
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Order not found: " + orderId));
+                .orElseThrow(() -> new NoSuchElementException(ORDER_NOT_FOUND_MSG + orderId));
 
         order.setStatus(request.status());
         order.setUpdatedAt(LocalDateTime.now());
@@ -190,7 +192,7 @@ public class OrderService {
         log.info("Cancelling order: {}", orderId);
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Order not found: " + orderId));
+                .orElseThrow(() -> new NoSuchElementException(ORDER_NOT_FOUND_MSG + orderId));
 
         if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELLED) {
             throw new IllegalStateException("Cannot cancel order with status: " + order.getStatus());
@@ -237,7 +239,7 @@ public class OrderService {
                         item.getPrice(),
                         item.getSubtotal()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         return new OrderDTO(
                 order.getId(),

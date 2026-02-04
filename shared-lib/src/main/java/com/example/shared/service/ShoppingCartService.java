@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ShoppingCartService {
 
+    private static final String CART_NOT_FOUND_MSG = "Cart not found for user: ";
+    private static final String ITEM_NOT_FOUND_MSG = "Item not found in cart: ";
+
     private final ShoppingCartRepository cartRepository;
 
     /**
@@ -69,7 +72,7 @@ public class ShoppingCartService {
         log.debug("Fetching cart for user: {}", userId);
         return cartRepository.findByUserId(userId)
                 .map(this::mapToDTO)
-                .orElseThrow(() -> new NoSuchElementException("Cart not found for user: " + userId));
+                .orElseThrow(() -> new NoSuchElementException(CART_NOT_FOUND_MSG + userId));
     }
 
     /**
@@ -133,12 +136,12 @@ public class ShoppingCartService {
                 userId, productId, request.quantity());
 
         ShoppingCart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new NoSuchElementException("Cart not found for user: " + userId));
+                .orElseThrow(() -> new NoSuchElementException(CART_NOT_FOUND_MSG + userId));
 
         CartItem item = cart.getItems().stream()
                 .filter(i -> i.getProductId().equals(productId))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Item not found in cart: " + productId));
+                .orElseThrow(() -> new NoSuchElementException(ITEM_NOT_FOUND_MSG + productId));
 
         item.setQuantity(request.quantity());
         item.setSubtotal(item.getPrice().multiply(BigDecimal.valueOf(request.quantity())));
@@ -161,11 +164,11 @@ public class ShoppingCartService {
         log.info("Removing item from cart - User: {}, Product: {}", userId, productId);
 
         ShoppingCart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new NoSuchElementException("Cart not found for user: " + userId));
+                .orElseThrow(() -> new NoSuchElementException(CART_NOT_FOUND_MSG + userId));
 
         boolean removed = cart.getItems().removeIf(item -> item.getProductId().equals(productId));
         if (!removed) {
-            throw new NoSuchElementException("Item not found in cart: " + productId);
+            throw new NoSuchElementException(ITEM_NOT_FOUND_MSG + productId);
         }
 
         recalculateCart(cart);
@@ -254,7 +257,7 @@ public class ShoppingCartService {
                         item.getSubtotal(),
                         item.getCreatedAt()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         return new ShoppingCartDTO(
                 cart.getId(),

@@ -25,6 +25,8 @@ import java.util.UUID;
 @Slf4j
 public class SellerProfileService {
 
+    private static final String PROFILE_NOT_FOUND_MSG = "Profile not found for seller: ";
+
     private final SellerProfileRepository profileRepository;
 
     /**
@@ -54,7 +56,7 @@ public class SellerProfileService {
         log.debug("Fetching profile for seller: {}", sellerId);
         return profileRepository.findBySellerId(sellerId)
                 .map(this::mapToDTO)
-                .orElseThrow(() -> new NoSuchElementException("Profile not found for seller: " + sellerId));
+                .orElseThrow(() -> new NoSuchElementException(PROFILE_NOT_FOUND_MSG + sellerId));
     }
 
     /**
@@ -96,7 +98,7 @@ public class SellerProfileService {
         }
 
         SellerProfile profile = profileRepository.findBySellerId(sellerId)
-                .orElseThrow(() -> new NoSuchElementException("Profile not found for seller: " + sellerId));
+                .orElseThrow(() -> new NoSuchElementException(PROFILE_NOT_FOUND_MSG + sellerId));
 
         profile.setAverageRating(newRating);
         profile.setTotalReviews(reviewCount);
@@ -116,7 +118,7 @@ public class SellerProfileService {
         log.info("Verifying seller: {}", sellerId);
 
         SellerProfile profile = profileRepository.findBySellerId(sellerId)
-                .orElseThrow(() -> new NoSuchElementException("Profile not found for seller: " + sellerId));
+                .orElseThrow(() -> new NoSuchElementException(PROFILE_NOT_FOUND_MSG + sellerId));
 
         profile.setVerified(true);
         profile.setUpdatedAt(LocalDateTime.now());

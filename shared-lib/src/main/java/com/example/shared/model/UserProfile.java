@@ -1,5 +1,8 @@
 package com.example.shared.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -13,6 +16,9 @@ import java.util.List;
  * Stored in MongoDB collection "user_profiles".
  */
 @Document(collection = "user_profiles")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserProfile {
 
     @Id

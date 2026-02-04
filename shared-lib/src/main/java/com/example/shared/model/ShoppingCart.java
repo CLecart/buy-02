@@ -1,5 +1,8 @@
 package com.example.shared.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -14,6 +17,9 @@ import java.math.BigDecimal;
  * One cart per user, updated frequently.
  */
 @Document(collection = "shopping_carts")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShoppingCart {
 
     @Id
