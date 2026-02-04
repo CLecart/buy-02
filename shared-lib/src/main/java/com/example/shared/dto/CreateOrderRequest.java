@@ -1,6 +1,5 @@
 package com.example.shared.dto;
 
-import com.example.shared.model.OrderStatus;
 import com.example.shared.model.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
