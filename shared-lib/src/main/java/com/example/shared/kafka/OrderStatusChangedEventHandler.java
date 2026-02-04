@@ -1,7 +1,7 @@
 package com.example.shared.kafka;
 
 import com.example.shared.event.OrderStatusChangedEvent;
-import com.example.shared.model.OrderStatus;
+import com.example.shared.exception.EventProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -43,7 +43,7 @@ public class OrderStatusChangedEventHandler {
             log.info("OrderStatusChangedEvent processed: {}", event.orderId());
         } catch (Exception e) {
             log.error("Error processing OrderStatusChangedEvent: {}", event.orderId(), e);
-            throw new RuntimeException("Failed to process order status changed event", e);
+            throw new EventProcessingException("Failed to process order status changed event", e);
         }
     }
 

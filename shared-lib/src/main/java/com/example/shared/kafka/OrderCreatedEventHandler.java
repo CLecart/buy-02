@@ -1,6 +1,7 @@
 package com.example.shared.kafka;
 
 import com.example.shared.event.OrderCreatedEvent;
+import com.example.shared.exception.EventProcessingException;
 import com.example.shared.service.SellerProfileService;
 import com.example.shared.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class OrderCreatedEventHandler {
             log.info("OrderCreatedEvent processed successfully: {}", event.orderId());
         } catch (Exception e) {
             log.error("Error processing OrderCreatedEvent: {}", event.orderId(), e);
-            throw new RuntimeException("Failed to process order created event", e);
+            throw new EventProcessingException("Failed to process order created event", e);
         }
     }
 }
