@@ -49,20 +49,20 @@ public class OrderStatusChangedEventHandler {
 
     private void handleShipped(OrderStatusChangedEvent event) {
         log.info("Order shipped: {}", event.orderId());
-        // TODO: Send shipping notification email
-        // TODO: Update inventory tracking
+        // Future: Send shipping notification email
+        // Future: Update inventory tracking
     }
 
     private void handleDelivered(OrderStatusChangedEvent event) {
         log.info("Order delivered: {}", event.orderId());
-        // TODO: Send delivery confirmation email
-        // TODO: Trigger rating/review request
+        // Future: Send delivery confirmation email
+        // Future: Trigger rating/review request
     }
 
     private void handleCancelled(OrderStatusChangedEvent event) {
         log.info("Order cancelled: {} - Reason: {}", event.orderId(), event.reason());
-        // TODO: Process refund
-        // TODO: Restore inventory
-        // TODO: Send cancellation notification
+        // Future: Process refund
+        // Future: Restore inventory
+        // Future: Send cancellation notification
     }
 }

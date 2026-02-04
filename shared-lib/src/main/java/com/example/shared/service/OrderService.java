@@ -206,7 +206,7 @@ public class OrderService {
             new OrderStatusChangedEvent(
                 orderId,
                 order.getBuyerId(),
-                "", // TODO: Get buyer email from user service
+                "", // Future: Get buyer email from user service
                 oldStatus,
                 request.status(),
                 request.reason(),

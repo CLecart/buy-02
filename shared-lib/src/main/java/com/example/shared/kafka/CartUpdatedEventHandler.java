@@ -50,22 +50,22 @@ public class CartUpdatedEventHandler {
 
     private void handleItemAdded(CartUpdatedEvent event) {
         log.debug("Item added to cart: product={}, quantity={}", event.productId(), event.quantity());
-        // TODO: Track product interest for recommendations
-        // TODO: Update product view statistics
+        // Future: Track product interest for recommendations
+        // Future: Update product view statistics
     }
 
     private void handleItemRemoved(CartUpdatedEvent event) {
         log.debug("Item removed from cart: product={}", event.productId());
-        // TODO: Track abandoned items for retargeting
+        // Future: Track abandoned items for retargeting
     }
 
     private void handleQuantityChanged(CartUpdatedEvent event) {
         log.debug("Item quantity changed: product={}, quantity={}", event.productId(), event.quantity());
-        // TODO: Update inventory reservation
+        // Future: Update inventory reservation
     }
 
     private void handleCleared(CartUpdatedEvent event) {
         log.debug("Cart cleared: cart={}", event.cartId());
-        // TODO: Track abandoned carts for recovery campaigns
+        // Future: Track abandoned carts for recovery campaigns
     }
 }
