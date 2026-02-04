@@ -9,6 +9,7 @@ import com.example.shared.model.OrderStatus;
 import com.example.shared.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -94,7 +95,7 @@ public class OrderService {
      * @return the order DTO
      * @throws NoSuchElementException if order not found
      */
-    public OrderDTO getOrderById(String orderId) {
+    public OrderDTO getOrderById(@NonNull String orderId) {
         log.debug("Fetching order: {}", orderId);
         return orderRepository.findById(orderId)
                 .map(this::mapToDTO)
@@ -158,7 +159,7 @@ public class OrderService {
      * @return updated order DTO
      */
     @Transactional
-    public OrderDTO updateOrderStatus(String orderId, UpdateOrderStatusRequest request) {
+    public OrderDTO updateOrderStatus(@NonNull String orderId, UpdateOrderStatusRequest request) {
         log.info("Updating order status - Order: {}, Status: {}", orderId, request.status());
 
         Order order = orderRepository.findById(orderId)
@@ -183,7 +184,7 @@ public class OrderService {
      * @return updated order DTO
      */
     @Transactional
-    public OrderDTO cancelOrder(String orderId) {
+    public OrderDTO cancelOrder(@NonNull String orderId) {
         log.info("Cancelling order: {}", orderId);
 
         Order order = orderRepository.findById(orderId)
