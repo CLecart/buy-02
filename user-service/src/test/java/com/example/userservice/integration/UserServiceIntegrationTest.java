@@ -44,7 +44,7 @@ class UserServiceIntegrationTest {
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0");
 
-    static String TEST_JWT_SECRET;
+    static String testJwtSecret;
 
     @DynamicPropertySource
     static void registerMongoProperties(DynamicPropertyRegistry registry) {
@@ -52,8 +52,8 @@ class UserServiceIntegrationTest {
         
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        registry.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        registry.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
     @Test

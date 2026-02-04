@@ -18,6 +18,10 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final String MEDIA_ROOT = "/api/media";
+    private static final String MEDIA_PATH = "/api/media/**";
+    private static final String SELLER_ROLE = "SELLER";
+
     private final JwtService jwtService;
 
     public SecurityConfig(JwtService jwtService) {
@@ -33,10 +37,10 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/media", "/api/media/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, MEDIA_ROOT, MEDIA_PATH).permitAll()
                         // Only SELLER role can upload and delete media
-                        .requestMatchers(HttpMethod.POST, "/api/media/**").hasRole("SELLER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/media/**").hasRole("SELLER")
+                    .requestMatchers(HttpMethod.POST, MEDIA_PATH).hasRole(SELLER_ROLE)
+                    .requestMatchers(HttpMethod.DELETE, MEDIA_PATH).hasRole(SELLER_ROLE)
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable())

@@ -24,20 +24,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @Tag("integration")
-public class MediaControllerListIntegrationTest {
+class MediaControllerListIntegrationTest {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0.8");
 
-    static String TEST_JWT_SECRET;
+    static String testJwtSecret;
 
     @DynamicPropertySource
     static void props(DynamicPropertyRegistry r) {
         r.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        r.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        r.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
     @LocalServerPort
@@ -73,7 +73,7 @@ public class MediaControllerListIntegrationTest {
     org.junit.jupiter.api.Assumptions.assumeTrue(mediaRepository != null, "MediaRepository not available; skipping controller list test");
 
     
-    com.example.shared.security.JwtService localJwt = new com.example.shared.security.JwtService(TEST_JWT_SECRET, 3_600_000L);
+    com.example.shared.security.JwtService localJwt = new com.example.shared.security.JwtService(testJwtSecret, 3_600_000L);
     String token = localJwt.generateToken(ownerId, java.util.Map.of("roles", "SELLER"));
     org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
     headers.setBearerAuth(java.util.Objects.requireNonNull(token));
@@ -89,7 +89,8 @@ public class MediaControllerListIntegrationTest {
     com.example.mediaservice.dto.PagedResponse<com.example.mediaservice.dto.MediaMetadataDto> body = resp.getBody();
     java.util.Objects.requireNonNull(body, "response body should not be null");
     List<com.example.mediaservice.dto.MediaMetadataDto> list = java.util.Objects.requireNonNull(body.getContent(), "paged content should not be null");
-    assertThat(list).isNotEmpty();
-    assertThat(list).anyMatch(m -> productId.equals(m.getProductId()) && ownerId.equals(m.getOwnerId()));
+    assertThat(list)
+        .isNotEmpty()
+        .anyMatch(m -> productId.equals(m.getProductId()) && ownerId.equals(m.getOwnerId()));
     }
 }

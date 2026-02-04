@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
- 
+import org.springframework.context.annotation.Import;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -18,24 +18,24 @@ import org.springframework.test.context.DynamicPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = {"spring.main.allow-bean-definition-overriding=true"})
-@org.springframework.context.annotation.Import({TestSecurityConfig.class, com.example.shared.web.ApiExceptionHandler.class})
+@Import({TestSecurityConfig.class, com.example.shared.web.ApiExceptionHandler.class})
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 @Testcontainers
 @Tag("integration")
-public class ProductValidationErrorIntegrationTest {
+class ProductValidationErrorIntegrationTest {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0.8");
 
-    static String TEST_JWT_SECRET;
+    static String testJwtSecret;
 
     @DynamicPropertySource
     static void setProps(DynamicPropertyRegistry reg) {
         reg.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        reg.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        reg.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
 
@@ -66,7 +66,10 @@ public class ProductValidationErrorIntegrationTest {
                 .andReturn();
 
         String body = mvcResult.getResponse().getContentAsString();
-        assertThat(body).isNotBlank();
-        assertThat(body).contains("validation_error").contains("name").contains("price");
+        assertThat(body)
+            .isNotBlank()
+            .contains("validation_error")
+            .contains("name")
+            .contains("price");
     }
 }
