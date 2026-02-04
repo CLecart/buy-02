@@ -53,13 +53,12 @@ public class OrderService {
         var items = request.items().stream()
                 .map(itemRequest -> {
                     BigDecimal subtotal = itemRequest.price().multiply(BigDecimal.valueOf(itemRequest.quantity()));
-                    return new Order.OrderItem(
+                    return new OrderItem(
                             itemRequest.productId(),
                             itemRequest.sellerId(),
                             itemRequest.productName(),
                             itemRequest.quantity(),
-                            itemRequest.price(),
-                            subtotal
+                            itemRequest.price()
                     );
                 })
                 .collect(Collectors.toList());
