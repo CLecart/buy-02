@@ -19,12 +19,19 @@
         <spotbugs.plugin.version>4.7.3.2</spotbugs.plugin.version>
         <maven-pmd-plugin.version>3.22.0</maven-pmd-plugin.version>
         <maven-checkstyle-plugin.version>3.2.2</maven-checkstyle-plugin.version>
+        <sonar.maven.plugin.version>3.10.0.2594</sonar.maven.plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <!-- Default fail-on properties: disabled locally, enabled by the 'analysis' profile -->
         <spotbugs.failOnError>false</spotbugs.failOnError>
         <pmd.failOnViolation>false</pmd.failOnViolation>
         <checkstyle.failOnViolation>false</checkstyle.failOnViolation>
+        <!-- SonarQube Configuration -->
+        <sonar.projectKey>buy-02</sonar.projectKey>
+        <sonar.projectName>buy-02 E-Commerce Platform</sonar.projectName>
+        <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+        <sonar.java.source>${java.version}</sonar.java.source>
+        <sonar.coverage.exclusions>**/config/**,**/dto/**,**/model/**,**/*Application.java</sonar.coverage.exclusions>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -161,6 +168,11 @@
                         <junit.jupiter.tags.exclude>integration</junit.jupiter.tags.exclude>
                     </providerProperties>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.maven.plugin.version}</version>
             </plugin>
         </plugins>
     </build>
