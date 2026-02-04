@@ -1,6 +1,7 @@
 package com.example.shared.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * CartItem represents a single product line item within a shopping cart.
@@ -22,7 +23,7 @@ public class CartItem {
 
     private String mediaId;
 
-    private Long createdAt;
+    private LocalDateTime createdAt;
 
     // Constructors
     public CartItem() {
@@ -35,7 +36,17 @@ public class CartItem {
         this.quantity = quantity;
         this.price = price;
         this.subtotal = price.multiply(new BigDecimal(quantity));
-        this.createdAt = System.currentTimeMillis();
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public CartItem(String productId, String sellerId, String productName, Integer quantity, BigDecimal price, BigDecimal subtotal, LocalDateTime createdAt) {
+        this.productId = productId;
+        this.sellerId = sellerId;
+        this.productName = productName;
+        this.quantity = quantity;
+        this.price = price;
+        this.subtotal = subtotal;
+        this.createdAt = createdAt;
     }
 
     // Getters & Setters
@@ -97,11 +108,11 @@ public class CartItem {
         this.mediaId = mediaId;
     }
 
-    public Long getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Long createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

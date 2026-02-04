@@ -32,6 +32,13 @@
             <artifactId>shared-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Reuse shared test helpers (test-jar) to get DockerAvailabilityCondition and service loader -->
         <dependency>
             <groupId>com.example</groupId>
