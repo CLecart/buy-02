@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Service for Shopping Cart management.
@@ -188,7 +187,7 @@ public class ShoppingCartService {
         log.info("Clearing cart for user: {}", userId);
 
         ShoppingCart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new NoSuchElementException("Cart not found for user: " + userId));
+                .orElseThrow(() -> new NoSuchElementException(CART_NOT_FOUND_MSG + userId));
 
         cart.getItems().clear();
         cart.setTotalPrice(BigDecimal.ZERO);

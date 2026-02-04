@@ -7,7 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,11 +17,9 @@ import java.math.BigDecimal;
  * Stored in MongoDB collection "orders".
  */
 @Document(collection = "orders")
-@CompoundIndexes({
-    @CompoundIndex(name = "buyerId_createdAt_idx", def = "{'buyerId': 1, 'createdAt': -1}"),
-    @CompoundIndex(name = "sellerId_createdAt_idx", def = "{'items.sellerId': 1, 'createdAt': -1}"),
-    @CompoundIndex(name = "status_createdAt_idx", def = "{'status': 1, 'createdAt': -1}")
-})
+@CompoundIndex(name = "buyerId_createdAt_idx", def = "{'buyerId': 1, 'createdAt': -1}")
+@CompoundIndex(name = "sellerId_createdAt_idx", def = "{'items.sellerId': 1, 'createdAt': -1}")
+@CompoundIndex(name = "status_createdAt_idx", def = "{'status': 1, 'createdAt': -1}")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
