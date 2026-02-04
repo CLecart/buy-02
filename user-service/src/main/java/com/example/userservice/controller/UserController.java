@@ -35,6 +35,7 @@ public class UserController {
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of("image/jpeg", "image/png", "image/gif");
     private static final long MAX_AVATAR_SIZE = 2L * 1024L * 1024L; // 2MB
     private static final Path AVATAR_STORAGE_PATH = Paths.get("uploads", "avatars");
+    private static final String ERROR_KEY = "error";
 
     private final UserRepository userRepository;
     private final UserEventProducer userEventProducer;
@@ -57,8 +58,8 @@ public class UserController {
 
         String principal;
         Object p = auth.getPrincipal();
-        if (p instanceof String) {
-            principal = (String) p;
+        if (p instanceof String principalStr) {
+            principal = principalStr;
         } else if (auth.getName() != null) {
             principal = auth.getName();
         } else {
@@ -83,12 +84,12 @@ public class UserController {
      */
     @PostMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Object> uploadAvatar(@RequestParam("file") MultipartFile file) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof String)) {
+        Object principal = auth != null ? auth.getPrincipal() : null;
+        if (!(principal instanceof String userId)) {
             return ResponseEntity.status(401).build();
         }
-        String userId = (String) auth.getPrincipal();
 
         Optional<User> userOpt = userRepository.findById(java.util.Objects.requireNonNull(userId, "userId"));
         if (userOpt.isEmpty()) {
@@ -98,13 +99,13 @@ public class UserController {
 
         // Validate file size
         if (file.getSize() > MAX_AVATAR_SIZE) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("error", "File size exceeds 2MB limit"));
+            return ResponseEntity.badRequest().body(java.util.Map.of(ERROR_KEY, "File size exceeds 2MB limit"));
         }
 
         // Validate MIME type
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Only JPEG, PNG, and GIF images are allowed"));
+            return ResponseEntity.badRequest().body(java.util.Map.of(ERROR_KEY, "Only JPEG, PNG, and GIF images are allowed"));
         }
 
         try {
@@ -118,15 +119,7 @@ public class UserController {
 
             // Delete old avatar if exists
             String oldAvatarUrl = user.getAvatarUrl();
-            if (oldAvatarUrl != null && !oldAvatarUrl.isBlank()) {
-                try {
-                    String oldFilename = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf('/') + 1);
-                    Path oldPath = AVATAR_STORAGE_PATH.resolve(oldFilename);
-                    Files.deleteIfExists(oldPath);
-                } catch (Exception ignored) {
-                    // Ignore deletion errors
-                }
-            }
+            deleteAvatarFileIfExists(oldAvatarUrl);
 
             // Save new avatar
             file.transferTo(java.util.Objects.requireNonNull(targetPath.toFile(), "targetPath"));
@@ -139,7 +132,7 @@ public class UserController {
             UserDto dto = new UserDto(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.getAvatarUrl());
             return ResponseEntity.ok(dto);
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().body(java.util.Map.of("error", "Failed to save avatar"));
+            return ResponseEntity.internalServerError().body(java.util.Map.of(ERROR_KEY, "Failed to save avatar"));
         }
     }
 
@@ -191,10 +184,10 @@ public class UserController {
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteAccount() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof String)) {
+        Object principal = auth != null ? auth.getPrincipal() : null;
+        if (!(principal instanceof String userId)) {
             return ResponseEntity.status(401).build();
         }
-        String userId = (String) auth.getPrincipal();
 
         Optional<User> userOpt = userRepository.findById(java.util.Objects.requireNonNull(userId));
         if (userOpt.isEmpty()) {
@@ -205,15 +198,7 @@ public class UserController {
 
         // Delete avatar file if exists
         String avatarUrl = user.getAvatarUrl();
-        if (avatarUrl != null && !avatarUrl.isBlank()) {
-            try {
-                String filename = avatarUrl.substring(avatarUrl.lastIndexOf('/') + 1);
-                Path avatarPath = AVATAR_STORAGE_PATH.resolve(filename);
-                Files.deleteIfExists(avatarPath);
-            } catch (Exception ignored) {
-                // Ignore deletion errors
-            }
-        }
+        deleteAvatarFileIfExists(avatarUrl);
 
         // Publish event for cascade deletion (products and media)
         userEventProducer.publishUserDeleted(userId, user.getRole().name());
@@ -222,5 +207,19 @@ public class UserController {
         userRepository.deleteById(userId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    private void deleteAvatarFileIfExists(String avatarUrl) {
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            return;
+        }
+
+        try {
+            String filename = avatarUrl.substring(avatarUrl.lastIndexOf('/') + 1);
+            Path avatarPath = AVATAR_STORAGE_PATH.resolve(filename);
+            Files.deleteIfExists(avatarPath);
+        } catch (Exception ignored) {
+            // Ignore deletion errors
+        }
     }
 }

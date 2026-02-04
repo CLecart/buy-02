@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * Kafka producer for publishing domain events.
  * Enables event-driven architecture across microservices.
@@ -28,8 +30,9 @@ public class EventProducer {
      * Triggers updates to user and seller profiles.
      */
     public void publishOrderCreated(OrderCreatedEvent event) {
-        log.info("Publishing OrderCreatedEvent: {}", event.orderId());
-        kafkaTemplate.send(ORDER_CREATED_TOPIC, event.orderId(), event);
+        String orderId = Objects.requireNonNull(event.orderId(), "orderId");
+        log.info("Publishing OrderCreatedEvent: {}", orderId);
+        kafkaTemplate.send(ORDER_CREATED_TOPIC, orderId, event);
     }
 
     /**
@@ -37,8 +40,9 @@ public class EventProducer {
      * Triggers notifications and profile updates.
      */
     public void publishOrderStatusChanged(OrderStatusChangedEvent event) {
-        log.info("Publishing OrderStatusChangedEvent: {} -> {}", event.orderId(), event.newStatus());
-        kafkaTemplate.send(ORDER_STATUS_CHANGED_TOPIC, event.orderId(), event);
+        String orderId = Objects.requireNonNull(event.orderId(), "orderId");
+        log.info("Publishing OrderStatusChangedEvent: {} -> {}", orderId, event.newStatus());
+        kafkaTemplate.send(ORDER_STATUS_CHANGED_TOPIC, orderId, event);
     }
 
     /**
@@ -46,7 +50,8 @@ public class EventProducer {
      * Used for inventory tracking and analytics.
      */
     public void publishCartUpdated(CartUpdatedEvent event) {
-        log.debug("Publishing CartUpdatedEvent: {} - {}", event.cartId(), event.action());
-        kafkaTemplate.send(CART_UPDATED_TOPIC, event.cartId(), event);
+        String cartId = Objects.requireNonNull(event.cartId(), "cartId");
+        log.debug("Publishing CartUpdatedEvent: {} - {}", cartId, event.action());
+        kafkaTemplate.send(CART_UPDATED_TOPIC, cartId, event);
     }
 }

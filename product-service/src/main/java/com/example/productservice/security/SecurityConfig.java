@@ -15,6 +15,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final String PRODUCTS_PATH = "/api/products/**";
+    private static final String SELLER_ROLE = "SELLER";
+
     private final JwtService jwtService;
 
     public SecurityConfig(JwtService jwtService) {
@@ -28,11 +31,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable());
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+            .requestMatchers(HttpMethod.GET, PRODUCTS_PATH).permitAll()
                 // Only SELLER role can create, update, delete products
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("SELLER")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("SELLER")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("SELLER")
+            .requestMatchers(HttpMethod.POST, PRODUCTS_PATH).hasRole(SELLER_ROLE)
+            .requestMatchers(HttpMethod.PUT, PRODUCTS_PATH).hasRole(SELLER_ROLE)
+            .requestMatchers(HttpMethod.DELETE, PRODUCTS_PATH).hasRole(SELLER_ROLE)
                 .anyRequest().authenticated()
         );
 
