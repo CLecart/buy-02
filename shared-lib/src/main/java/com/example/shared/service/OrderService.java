@@ -51,17 +51,14 @@ public class OrderService {
         // Calculate total price and create order items
         BigDecimal totalPrice = BigDecimal.ZERO;
         var items = request.items().stream()
-                .map(itemRequest -> {
-                    BigDecimal subtotal = itemRequest.price().multiply(BigDecimal.valueOf(itemRequest.quantity()));
-                    return new OrderItem(
-                            itemRequest.productId(),
-                            itemRequest.sellerId(),
-                            itemRequest.productName(),
-                            itemRequest.quantity(),
-                            itemRequest.price()
-                    );
-                })
-                .collect(Collectors.toList());
+                .map(itemRequest -> new OrderItem(
+                        itemRequest.productId(),
+                        itemRequest.sellerId(),
+                        itemRequest.productName(),
+                        itemRequest.quantity(),
+                        itemRequest.price()
+                ))
+                .toList();
 
         for (var item : items) {
             totalPrice = totalPrice.add(item.getSubtotal());
