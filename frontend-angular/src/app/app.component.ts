@@ -55,7 +55,7 @@ export class AppComponent implements OnInit {
   title = "buy-02";
   currentUser: User | null = null;
 
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   ngOnInit(): void {
     this.authService.init();
