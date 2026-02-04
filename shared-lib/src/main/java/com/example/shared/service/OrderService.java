@@ -3,6 +3,9 @@ package com.example.shared.service;
 import com.example.shared.dto.CreateOrderRequest;
 import com.example.shared.dto.OrderDTO;
 import com.example.shared.dto.UpdateOrderStatusRequest;
+import com.example.shared.event.OrderCreatedEvent;
+import com.example.shared.event.OrderStatusChangedEvent;
+import com.example.shared.kafka.EventProducer;
 import com.example.shared.model.Order;
 import com.example.shared.model.OrderItem;
 import com.example.shared.model.OrderStatus;
@@ -34,6 +37,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserProfileService userProfileService;
     private final SellerProfileService sellerProfileService;
+    private final EventProducer eventProducer;
 
     /**
      * Create a new order from a purchase request.
@@ -83,6 +87,28 @@ public class OrderService {
 
         // Update seller profiles with new sales
         items.forEach(item -> sellerProfileService.recordSale(item.getSellerId(), item.getQuantity(), item.getSubtotal()));
+
+        // Publish order created event for async processing
+        eventProducer.publishOrderCreated(
+            new OrderCreatedEvent(
+                orderId,
+                request.buyerId(),
+                request.buyerEmail(),
+                items.stream()
+                    .map(item -> new OrderCreatedEvent.OrderItemSnapshot(
+                        item.getProductId(),
+                        item.getSellerId(),
+                        item.getProductName(),
+                        item.getQuantity(),
+                        item.getPrice(),
+                        item.getSubtotal()
+                    ))
+                    .toList(),
+                totalPrice,
+                request.shippingAddress(),
+                LocalDateTime.now()
+            )
+        );
 
         log.info("Order created successfully: {}", orderId);
         return mapToDTO(savedOrder);
@@ -165,6 +191,7 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NoSuchElementException(ORDER_NOT_FOUND_MSG + orderId));
 
+        OrderStatus oldStatus = order.getStatus();
         order.setStatus(request.status());
         order.setUpdatedAt(LocalDateTime.now());
 
@@ -173,6 +200,20 @@ public class OrderService {
         }
 
         Order updatedOrder = orderRepository.save(order);
+
+        // Publish order status changed event
+        eventProducer.publishOrderStatusChanged(
+            new OrderStatusChangedEvent(
+                orderId,
+                order.getBuyerId(),
+                "", // Future: Get buyer email from user service
+                oldStatus,
+                request.status(),
+                request.reason(),
+                LocalDateTime.now()
+            )
+        );
+
         log.info("Order status updated successfully: {}", orderId);
         return mapToDTO(updatedOrder);
     }

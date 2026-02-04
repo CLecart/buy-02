@@ -11,5 +11,7 @@ public record UpdateOrderStatusRequest(
         @NotNull(message = "Order status is required")
         OrderStatus status,
 
-        String trackingNumber
+        String trackingNumber,
+
+        String reason
 ) {}

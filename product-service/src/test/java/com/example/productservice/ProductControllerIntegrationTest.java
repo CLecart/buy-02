@@ -26,20 +26,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @Tag("integration")
-public class ProductControllerIntegrationTest {
+class ProductControllerIntegrationTest {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0.8");
 
-    static String TEST_JWT_SECRET;
+    static String testJwtSecret;
 
     @DynamicPropertySource
     static void setProps(DynamicPropertyRegistry reg) {
         reg.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        reg.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        reg.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
