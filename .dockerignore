@@ -1,0 +1,7 @@
+target
+.git
+.idea
+node_modules
+frontend-angular/dist
+logs
+.env

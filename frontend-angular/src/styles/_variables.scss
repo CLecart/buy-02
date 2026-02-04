@@ -1,0 +1,142 @@
+/**
+ * @file _variables.scss
+ * @description Centralized design tokens and CSS variables for buy-02 theme.
+ *
+ * This file defines all design system variables used across the application.
+ * CSS custom properties enable dynamic dark mode support.
+ *
+ * @usage Import in styles.scss or use custom properties directly.
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties
+ */
+
+// =============================================================================
+// BASE COLORS
+// =============================================================================
+
+/// Brand primary color
+$primary-light: #007bff;
+$primary-dark: #4dabf7;
+
+/// Primary color on hover
+$primary-hover-light: #0056b3;
+$primary-hover-dark: #74c0fc;
+
+/// Accent color (success, validation)
+$accent-light: #28a745;
+$accent-dark: #51cf66;
+
+/// Danger color (errors, deletion)
+$danger-light: #dc3545;
+$danger-dark: #ff6b6b;
+
+/// Warning color
+$warning-light: #ffc107;
+$warning-dark: #ffd43b;
+
+/// Info color
+$info-light: #17a2b8;
+$info-dark: #22b8cf;
+
+// =============================================================================
+// SURFACE COLORS
+// =============================================================================
+
+/// Main background color
+$bg-light: #f8f9fa;
+$bg-dark: #1a1b1e;
+
+/// Surface color (cards, modals)
+$surface-light: #ffffff;
+$surface-dark: #25262b;
+
+/// Hover background color
+$hover-bg-light: #f1f3f5;
+$hover-bg-dark: #2c2e33;
+
+// =============================================================================
+// TEXT COLORS
+// =============================================================================
+
+/// Primary text color
+$text-light: #212529;
+$text-dark: #c1c2c5;
+
+/// Secondary/muted text color
+$text-muted-light: #6c757d;
+$text-muted-dark: #909296;
+
+// =============================================================================
+// BORDERS AND SHADOWS
+// =============================================================================
+
+/// Border color
+$border-light: #e9ecef;
+$border-dark: #373a40;
+
+/// Box shadow
+$shadow-light: rgba(0, 0, 0, 0.05);
+$shadow-dark: rgba(0, 0, 0, 0.3);
+
+/// Overlay background (modals)
+$overlay-light: rgba(0, 0, 0, 0.5);
+$overlay-dark: rgba(0, 0, 0, 0.7);
+
+// =============================================================================
+// ESPACEMENT
+// =============================================================================
+
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+
+// =============================================================================
+// TYPOGRAPHIE
+// =============================================================================
+
+$font-family-base:
+  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+  Arial, sans-serif;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.25rem;
+$font-size-xl: 1.5rem;
+$line-height-base: 1.5;
+
+// =============================================================================
+// BORDURES
+// =============================================================================
+
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-full: 50%;
+
+// =============================================================================
+// TRANSITIONS
+// =============================================================================
+
+$transition-fast: 0.15s ease;
+$transition-base: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+// =============================================================================
+// BREAKPOINTS
+// =============================================================================
+
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+
+// =============================================================================
+// Z-INDEX
+// =============================================================================
+
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-fixed: 300;
+$z-modal-backdrop: 900;
+$z-modal: 1000;
+$z-tooltip: 1100;

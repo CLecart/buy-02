@@ -1,0 +1,227 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example</groupId>
+    <artifactId>buy-02-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>buy-02 (parent)</name>
+
+    <properties>
+        <java.version>21</java.version>
+        <spring.boot.version>3.2.0</spring.boot.version>
+        <!-- Analyzer toggles: default to skipping SpotBugs and PMD locally; enable via -Panalysis or CI profile -->
+        <spotbugs.skip>true</spotbugs.skip>
+        <pmd.skip>true</pmd.skip>
+        <checkstyle.skip>false</checkstyle.skip>
+        <!-- Plugin version pins (can be adjusted if newer compatible releases are available) -->
+        <spotbugs.plugin.version>4.7.3.2</spotbugs.plugin.version>
+        <maven-pmd-plugin.version>3.22.0</maven-pmd-plugin.version>
+        <maven-checkstyle-plugin.version>3.2.2</maven-checkstyle-plugin.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <!-- Default fail-on properties: disabled locally, enabled by the 'analysis' profile -->
+        <spotbugs.failOnError>false</spotbugs.failOnError>
+        <pmd.failOnViolation>false</pmd.failOnViolation>
+        <checkstyle.failOnViolation>false</checkstyle.failOnViolation>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <modules>
+        <module>shared-lib</module>
+        <module>user-service</module>
+        <module>product-service</module>
+        <module>media-service</module>
+        <module>frontend-angular</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Import Spring Boot BOM for consistent versions -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <configuration>
+                        <!-- Reduce noisy JVM warnings from dynamic agents / class-data-sharing during test runs -->
+                        <!-- Force ANSI colors/JAnsi in forked JVMs so test output retains colors (eg. green for success).
+                             We append ${argLine} so user-provided values are preserved. -->
+                        <argLine>-XX:+EnableDynamicAgentLoading -Xshare:off -Djansi.force=true -Djansi.passthrough=true -Dspring.output.ansi.enabled=ALWAYS</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        
+        <!-- Provide sane default test configuration for all modules: run unit tests via Surefire and
+             exclude integration tests by naming convention (classes ending with *IntegrationTest or *IT).
+             Integration tests should be executed explicitly using the 'integration' profile which binds
+             the Failsafe plugin. This keeps local developer builds fast and avoids failing builds when
+             Docker/Testcontainers are not available.
+         -->
+        <plugins>
+            <!-- Static analysis tools: SpotBugs, PMD, Checkstyle.
+                 Configured to generate reports during explicit invocation; we do NOT fail the default build
+                 automatically here so developers can run checks and fix issues iteratively. Later these
+                 checks can be made blocking in CI when the codebase is clean. -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.plugin.version}</version>
+                <configuration>
+                    <!-- Controlled via property so CI/profile can enable the check reproducibly -->
+                    <skip>${spotbugs.skip}</skip>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <failOnError>${spotbugs.failOnError}</failOnError>
+                    <xmlOutput>true</xmlOutput>
+                    <outputDirectory>${project.build.directory}/spotbugs</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <printFailingErrors>false</printFailingErrors>
+                    <failOnViolation>${pmd.failOnViolation}</failOnViolation>
+                    <rulesets>
+                        <ruleset>config/pmd/pmd-ruleset.xml</ruleset>
+                    </rulesets>
+                    <!-- PMD target JDK for parsing rules evaluation -->
+                    <targetJdk>21</targetJdk>
+                    <!-- Controlled via property so CI/profile can enable the check reproducibly -->
+                    <skip>${pmd.skip}</skip>
+                    <!-- Temporary excludes for PMD processing errors on Java 21 constructs.
+                         We'll narrow these as PMD support improves. Patterns exclude generated/DTO/security/test code
+                         that currently triggers parser errors. -->
+                    <excludes>
+                        <exclude>**/dto/**</exclude>
+                        <exclude>**/security/**</exclude>
+                        <exclude>**/test/**</exclude>
+                        <exclude>**/*Dto.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <configuration>
+                    <configLocation>config/checkstyle/checkstyle.xml</configLocation>
+                    <failOnViolation>${checkstyle.failOnViolation}</failOnViolation>
+                    <outputDirectory>${project.build.directory}/checkstyle</outputDirectory>
+                    <skip>${checkstyle.skip}</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IntegrationTest.java</exclude>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                    <!-- Exclude tests tagged as 'integration' by default. Use -Pintegration to run them. -->
+                    <providerProperties>
+                        <junit.jupiter.tags.exclude>integration</junit.jupiter.tags.exclude>
+                    </providerProperties>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <includes>
+                                <include>**/*IntegrationTest.java</include>
+                                <include>**/*IT.java</include>
+                            </includes>
+                                        <!-- Ensure the integration profile runs tests tagged 'integration' when active. -->
+                                        <providerProperties>
+                                            <junit.jupiter.tags.include>integration</junit.jupiter.tags.include>
+                                        </providerProperties>
+                                        <!-- Force ANSI/JAnsi for forked integration test JVMs as well -->
+                                        <argLine>-Djansi.force=true -Djansi.passthrough=true -Dspring.output.ansi.enabled=ALWAYS</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>analysis</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- Enable analyzers when this profile is activated (e.g., CI runs) -->
+                <spotbugs.skip>false</spotbugs.skip>
+                <pmd.skip>false</pmd.skip>
+                <checkstyle.skip>false</checkstyle.skip>
+                <!-- Make analyzers fail the build on violations in the analysis profile -->
+                <spotbugs.failOnError>true</spotbugs.failOnError>
+                <pmd.failOnViolation>true</pmd.failOnViolation>
+                <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
+            </properties>
+        </profile>
+    </profiles>
+</project>

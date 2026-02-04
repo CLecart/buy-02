@@ -1,0 +1,91 @@
+openapi: 3.1.0
+info:
+  title: buy-02 - media-service API
+  version: 0.1.0
+paths:
+  /api/media:
+    post:
+      summary: Upload media (multipart)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                productId:
+                  type: string
+                ownerId:
+                  type: string
+            encoding:
+              file:
+                contentType: image/*
+      security:
+        - bearerAuth: []
+      description: |
+        Upload a media file. Server enforces the following constraints:
+        - Maximum file size: 2 MB
+        - Allowed image MIME types (detected with Apache Tika): `image/png`, `image/jpeg`, `image/gif`
+        - Provide `productId` to attach to a product; ownership is verified server-side.
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request - validation or upload error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                validationError:
+                  summary: Validation error example
+                  value:
+                    error: validation_error
+                    message: Request failed validation
+                    details:
+                      name: must not be blank
+                      price: must not be null
+  /api/media/{id}:
+    get:
+      summary: Get media metadata / redirect to file
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Delete a media resource
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Deleted
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Short machine-readable error code (eg. invalid_argument)
+        message:
+          type: string
+          description: Human-readable message
+        details:
+          type: object
+          description: Optional additional details (validation fields, etc.)
+      required:
+        - error
+        - message

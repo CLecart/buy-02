@@ -1,0 +1,67 @@
+/**
+ * @file _theme.scss
+ * @description Light and dark theme definitions using CSS custom properties.
+ *
+ * Custom properties are defined on :root for light theme
+ * and on [data-theme="dark"] for dark theme.
+ *
+ * @usage Components use var(--variable-name) to access colors.
+ */
+
+@use "variables" as *;
+
+// =============================================================================
+// LIGHT THEME (default)
+// =============================================================================
+
+:root {
+  // Primary colors
+  --primary-color: #{$primary-light};
+  --primary-hover: #{$primary-hover-light};
+  --accent-color: #{$accent-light};
+  --danger-color: #{$danger-light};
+  --warning-color: #{$warning-light};
+  --info-color: #{$info-light};
+
+  // Surfaces
+  --bg-color: #{$bg-light};
+  --surface-color: #{$surface-light};
+  --hover-bg: #{$hover-bg-light};
+
+  // Text
+  --text-color: #{$text-light};
+  --text-muted: #{$text-muted-light};
+
+  // Borders and shadows
+  --border-color: #{$border-light};
+  --shadow: #{$shadow-light};
+  --overlay-bg: #{$overlay-light};
+}
+
+// =============================================================================
+// DARK THEME
+// =============================================================================
+
+[data-theme="dark"] {
+  // Primary colors
+  --primary-color: #{$primary-dark};
+  --primary-hover: #{$primary-hover-dark};
+  --accent-color: #{$accent-dark};
+  --danger-color: #{$danger-dark};
+  --warning-color: #{$warning-dark};
+  --info-color: #{$info-dark};
+
+  // Surfaces
+  --bg-color: #{$bg-dark};
+  --surface-color: #{$surface-dark};
+  --hover-bg: #{$hover-bg-dark};
+
+  // Text
+  --text-color: #{$text-dark};
+  --text-muted: #{$text-muted-dark};
+
+  // Borders and shadows
+  --border-color: #{$border-dark};
+  --shadow: #{$shadow-dark};
+  --overlay-bg: #{$overlay-dark};
+}

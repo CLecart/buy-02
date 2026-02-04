@@ -1,0 +1,94 @@
+<!-- Sign-up form with avatar upload for sellers -->
+<div class="auth-container">
+  <h1>Sign Up</h1>
+
+  <form (ngSubmit)="onSubmit()" #signupForm="ngForm">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        [(ngModel)]="request.name"
+        required
+        minlength="2"
+        #nameInput="ngModel"
+      />
+      <span class="error" *ngIf="nameInput.touched && nameInput.invalid">
+        Name must be at least 2 characters
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        [(ngModel)]="request.email"
+        required
+        email
+        #emailInput="ngModel"
+      />
+      <span class="error" *ngIf="emailInput.touched && emailInput.invalid">
+        Valid email is required
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        [(ngModel)]="request.password"
+        required
+        minlength="6"
+        #passwordInput="ngModel"
+      />
+      <span
+        class="error"
+        *ngIf="passwordInput.touched && passwordInput.invalid"
+      >
+        Password must be at least 6 characters
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="role">Role</label>
+      <select id="role" name="role" [(ngModel)]="request.role" required>
+        <option value="CLIENT">Client</option>
+        <option value="SELLER">Seller</option>
+      </select>
+    </div>
+
+    <!-- Avatar upload for sellers -->
+    <div class="form-group" *ngIf="request.role === 'SELLER'">
+      <label for="avatar">Avatar (optional)</label>
+      <input
+        type="file"
+        id="avatar"
+        accept="image/jpeg,image/png,image/gif"
+        (change)="onAvatarSelected($event)"
+      />
+      <span class="hint">Max 2MB, JPEG/PNG/GIF only</span>
+      <span class="error" *ngIf="avatarError">{{ avatarError }}</span>
+      <img
+        *ngIf="avatarPreview"
+        [src]="avatarPreview"
+        class="avatar-preview"
+        alt="Avatar preview"
+      />
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <button type="submit" [disabled]="signupForm.invalid || loading">
+      {{ loading ? "Creating account..." : "Sign Up" }}
+    </button>
+  </form>
+
+  <p class="link">
+    Already have an account? <a routerLink="/signin">Sign In</a>
+  </p>
+</div>

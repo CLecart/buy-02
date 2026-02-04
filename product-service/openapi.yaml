@@ -1,0 +1,95 @@
+openapi: 3.1.0
+info:
+  title: buy-02 - product-service API
+  version: 0.1.0
+paths:
+  /api/products:
+    get:
+      summary: List products (pagination & search)
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create a product
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "201":
+          description: Created
+  /api/products/{id}:
+    get:
+      summary: Get product by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    put:
+      summary: Update product
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete product
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Deleted
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+        userId:
+          type: string
+          description: >-
+            Deprecated: legacy field. Prefer `ownerId` which is the canonical reference
+            to the owning User entity (product.ownerId -> user.id).
+        ownerId:
+          type: string
+          description: The id of the User who owns this Product.
+        mediaIds:
+          type: array
+          items:
+            type: string

@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  title: user-service API
+  version: 0.1.0
+paths:
+  /api/auth/signup:
+    post:
+      summary: Sign up a new user
+      operationId: signup
+      responses:
+        "201":
+          description: Created
+
+  /api/auth/signin:
+    post:
+      summary: Sign in existing user
+      operationId: signin
+      responses:
+        "200":
+          description: OK
+
+  /api/users/me:
+    get:
+      summary: Get current user
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: OK

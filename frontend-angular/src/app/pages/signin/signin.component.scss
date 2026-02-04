@@ -1,0 +1,97 @@
+/**
+ * @file signin.component.scss
+ * @description Styles for the sign-in page component.
+ */
+
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+
+// =============================================================================
+// CONTAINER
+// =============================================================================
+
+.auth-container {
+  @include card;
+  max-width: 400px;
+  margin: $spacing-xl auto;
+  padding: $spacing-xl;
+}
+
+// =============================================================================
+// TYPOGRAPHY
+// =============================================================================
+
+h1 {
+  text-align: center;
+  margin-bottom: $spacing-lg;
+  color: var(--text-color);
+}
+
+// =============================================================================
+// FORM ELEMENTS
+// =============================================================================
+
+.form-group {
+  @include form-group;
+}
+
+label {
+  @include form-label;
+}
+
+input {
+  @include form-input;
+}
+
+// =============================================================================
+// VALIDATION
+// =============================================================================
+
+.error {
+  color: var(--danger-color);
+  font-size: $font-size-sm;
+  margin-top: $spacing-xs;
+  display: block;
+}
+
+.error-message {
+  color: var(--danger-color);
+  padding: 0.75rem;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: $border-radius-sm;
+  margin-bottom: $spacing-md;
+}
+
+// =============================================================================
+// BUTTONS
+// =============================================================================
+
+button {
+  @include button-primary;
+  width: 100%;
+  padding: 0.75rem;
+
+  &:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+  }
+}
+
+// =============================================================================
+// LINKS
+// =============================================================================
+
+.link {
+  text-align: center;
+  margin-top: $spacing-md;
+  color: var(--text-color);
+
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

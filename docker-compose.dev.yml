@@ -1,0 +1,104 @@
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: buy02-mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27018:27017"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: buy02-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: buy02-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_DATA_MONGODB_URI=${MONGO_URI}
+      - APP_JWT_SECRET=${APP_JWT_SECRET}
+      - STORAGE_PATH=${STORAGE_PATH}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SSL_ENABLED=${SSL_ENABLED:-false}
+    ports:
+      - "8081:8080"
+      - "8444:8443"
+    depends_on:
+      - mongo
+      - kafka
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_DATA_MONGODB_URI=${MONGO_URI}
+      - APP_JWT_SECRET=${APP_JWT_SECRET}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SSL_ENABLED=${SSL_ENABLED:-false}
+    ports:
+      - "8082:8080"
+      - "8445:8443"
+    depends_on:
+      - mongo
+      - kafka
+
+  media-service:
+    build:
+      context: ./media-service
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_DATA_MONGODB_URI=${MONGO_URI}
+      - APP_JWT_SECRET=${APP_JWT_SECRET}
+      - STORAGE_PATH=${STORAGE_PATH}
+      - PRODUCT_SERVICE_BASE_URL=http://product-service:8080
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SSL_ENABLED=${SSL_ENABLED:-false}
+    ports:
+      - "8083:8080"
+      - "8446:8443"
+    depends_on:
+      - mongo
+      - product-service
+      - kafka
+
+  frontend:
+    build:
+      context: ./frontend-angular
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    depends_on:
+      - user-service
+      - product-service
+      - media-service
+
+volumes:
+  mongo-data:

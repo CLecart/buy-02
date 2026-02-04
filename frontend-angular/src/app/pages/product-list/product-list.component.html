@@ -1,0 +1,63 @@
+<!-- Product listing page with search and pagination -->
+<div class="container">
+  <div class="header">
+    <h1>Products</h1>
+    <a
+      *ngIf="authService.isSeller()"
+      routerLink="/dashboard"
+      class="btn btn-primary"
+    >
+      Manage My Products
+    </a>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Search products..."
+      (keyup.enter)="search()"
+    />
+    <button (click)="search()">Search</button>
+  </div>
+
+  <div class="product-grid" *ngIf="products.length; else noProducts">
+    <div class="product-card" *ngFor="let product of products">
+      <div class="product-image">
+        <img
+          *ngIf="product.mediaIds?.length"
+          [src]="'/api/media/' + product.mediaIds[0]"
+          [alt]="product.name"
+          (error)="onImageError($event)"
+        />
+        <div *ngIf="!product.mediaIds?.length" class="no-image">No Image</div>
+      </div>
+      <div class="product-info">
+        <h3>{{ product.name }}</h3>
+        <p class="description">
+          {{ product.description || "No description" }}
+        </p>
+        <p class="price">{{ product.price | currency }}</p>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noProducts>
+    <div class="no-products">
+      <p>No products found.</p>
+    </div>
+  </ng-template>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button [disabled]="currentPage === 0" (click)="loadPage(currentPage - 1)">
+      Previous
+    </button>
+    <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+    <button
+      [disabled]="currentPage >= totalPages - 1"
+      (click)="loadPage(currentPage + 1)"
+    >
+      Next
+    </button>
+  </div>
+</div>

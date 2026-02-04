@@ -1,0 +1,48 @@
+# Maven / Java
+target/
+**/target/
+.mvn/
+*.iml
+
+# IDE
+/.idea/
+.settings/
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment & Secrets
+.env
+.env.local
+.env.production
+.keystore
+*.p12
+*.pem
+*.key
+*.crt
+config/ssl/*.pem
+config/ssl/*.key
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+**/.angular/
+.npm/
+
+# Build artifacts
+out/
+build/
+
+# Test reports and audit artifacts
+test-reports*.zip
+audit-*.tar.gz
+audit-*.txt
+*.sha256

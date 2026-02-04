@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <property name="severity" value="warning"/>
+        <!-- Minimal ruleset: avoid star imports and ensure file name matches outer type. -->
+        <module name="TreeWalker">
+            <module name="AvoidStarImport"/>
+            <module name="OuterTypeFilename"/>
+        </module>
+        <!-- LineLength is a file-level module and should be declared directly under Checker. -->
+        <module name="LineLength">
+            <property name="max" value="200"/>
+        </module>
+</module>

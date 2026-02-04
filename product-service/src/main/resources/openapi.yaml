@@ -1,0 +1,66 @@
+openapi: 3.1.0
+info:
+  title: product-service API
+  version: 0.1.0
+paths:
+  /api/products:
+    get:
+      summary: List products
+      operationId: listProducts
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create product
+      operationId: createProduct
+      responses:
+        "201":
+          description: Created
+
+  /api/products/{id}:
+    get:
+      summary: Get product
+      operationId: getProduct
+      responses:
+        "200":
+          description: OK
+    put:
+      summary: Update product
+      operationId: updateProduct
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Delete product
+      operationId: deleteProduct
+      responses:
+        "204":
+          description: No Content
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+        userId:
+          type: string
+          description: >-
+            Deprecated: legacy field. Prefer `ownerId` which is the canonical reference
+            to the owning User entity (product.ownerId -> user.id).
+        ownerId:
+          type: string
+          description: The id of the User who owns this Product.
+        mediaIds:
+          type: array
+          items:
+            type: string

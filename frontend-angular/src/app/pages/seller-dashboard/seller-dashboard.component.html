@@ -1,0 +1,216 @@
+<!-- Seller dashboard for managing products and media -->
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Seller Dashboard</h1>
+      <p *ngIf="currentUser">Welcome, {{ currentUser.name }}</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/" class="btn btn-secondary">View All Products</a>
+    </div>
+  </div>
+
+  <!-- Profile Section -->
+  <section class="section profile-section" *ngIf="currentUser">
+    <h2>Profile</h2>
+    <div class="profile-card">
+      <div class="avatar-container">
+        <img
+          *ngIf="currentUser.avatarUrl"
+          [src]="currentUser.avatarUrl"
+          alt="Avatar"
+          class="avatar"
+        />
+        <div *ngIf="!currentUser.avatarUrl" class="avatar-placeholder">
+          {{ getInitials() }}
+        </div>
+      </div>
+      <div class="profile-info">
+        <p><strong>Name:</strong> {{ currentUser.name }}</p>
+        <p><strong>Email:</strong> {{ currentUser.email }}</p>
+        <p><strong>Role:</strong> {{ currentUser.role }}</p>
+      </div>
+      <div class="avatar-upload">
+        <input
+          type="file"
+          id="avatar"
+          accept="image/jpeg,image/png,image/gif"
+          (change)="onAvatarSelected($event)"
+        />
+        <label for="avatar" class="btn btn-secondary">Change Avatar</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Product Section -->
+  <section class="section">
+    <h2>{{ editingProduct ? "Edit Product" : "Create New Product" }}</h2>
+    <form (ngSubmit)="saveProduct()" class="product-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Product Name *</label>
+          <input
+            type="text"
+            id="name"
+            [(ngModel)]="productForm.name"
+            name="name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="price">Price *</label>
+          <input
+            type="number"
+            id="price"
+            [(ngModel)]="productForm.price"
+            name="price"
+            required
+            min="0"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label for="quantity">Quantity</label>
+          <input
+            type="number"
+            id="quantity"
+            [(ngModel)]="productForm.quantity"
+            name="quantity"
+            min="0"
+            step="1"
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          [(ngModel)]="productForm.description"
+          name="description"
+          rows="3"
+        ></textarea>
+      </div>
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="!productForm.name || productForm.price < 0"
+        >
+          {{ editingProduct ? "Update" : "Create" }} Product
+        </button>
+        <button
+          type="button"
+          *ngIf="editingProduct"
+          class="btn btn-secondary"
+          (click)="cancelEdit()"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- My Products Section -->
+  <section class="section">
+    <h2>My Products ({{ myProducts.length }})</h2>
+
+    <div class="products-table" *ngIf="myProducts.length; else noProducts">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Media</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of myProducts">
+            <td>{{ product.name }}</td>
+            <td>{{ product.price | currency }}</td>
+            <td>{{ product.quantity || 0 }}</td>
+            <td>
+              <span class="media-count">
+                {{ product.mediaIds?.length || 0 }} images
+              </span>
+            </td>
+            <td class="actions">
+              <button
+                class="btn btn-sm btn-secondary"
+                (click)="editProduct(product)"
+              >
+                Edit
+              </button>
+              <button
+                class="btn btn-sm btn-primary"
+                (click)="openMediaManager(product)"
+              >
+                Media
+              </button>
+              <button
+                class="btn btn-sm btn-danger"
+                (click)="deleteProduct(product)"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noProducts>
+      <p class="empty-state">You haven't created any products yet.</p>
+    </ng-template>
+  </section>
+
+  <!-- Media Manager Modal -->
+  <div
+    class="modal"
+    *ngIf="selectedProductForMedia"
+    (click)="closeMediaManager()"
+  >
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Media for: {{ selectedProductForMedia.name }}</h3>
+        <button class="close-btn" (click)="closeMediaManager()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="upload-zone">
+          <input
+            type="file"
+            id="mediaUpload"
+            accept="image/jpeg,image/png,image/gif"
+            (change)="onMediaSelected($event)"
+            multiple
+          />
+          <label for="mediaUpload" class="upload-label">
+            <span>Click to upload images</span>
+            <small>Max 2MB each, JPEG/PNG/GIF only</small>
+          </label>
+        </div>
+        <div class="upload-error" *ngIf="uploadError">
+          {{ uploadError }}
+        </div>
+        <div class="media-grid" *ngIf="productMedia.length">
+          <div class="media-item" *ngFor="let media of productMedia">
+            <img
+              [src]="
+                media.url ||
+                '/api/media/files/' + media.ownerId + '/' + media.filename
+              "
+              [alt]="media.originalName"
+            />
+            <button class="delete-media" (click)="deleteMedia(media.id)">
+              &times;
+            </button>
+          </div>
+        </div>
+        <p *ngIf="!productMedia.length" class="empty-state">
+          No images uploaded yet.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

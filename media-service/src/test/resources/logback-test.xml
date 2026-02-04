@@ -1,0 +1,29 @@
+<configuration>
+  <property name="LOG_PATTERN" value="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Default to WARN to reduce verbosity during tests -->
+  <root level="WARN">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+  <!-- Suppress noisy libraries during tests -->
+  <logger name="org.springframework" level="WARN" />
+  <logger name="org.springframework.boot.autoconfigure" level="WARN" />
+  <logger name="org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration" level="ERROR" />
+  <logger name="org.springframework.web" level="ERROR" />
+  <logger name="org.springframework.web.servlet.handler" level="ERROR" />
+  <logger name="org.springframework.security" level="ERROR" />
+  <logger name="org.mongodb.driver" level="WARN" />
+  <logger name="org.testcontainers" level="WARN" />
+  <logger name="com.github.dockerjava" level="WARN" />
+  <logger name="org.apache.http" level="WARN" />
+  <!-- Suppress Kafka WARN logs during tests (LEADER_NOT_AVAILABLE is transient) -->
+  <logger name="org.apache.kafka" level="ERROR" />
+  <logger name="org.springframework.kafka" level="ERROR" />
+</configuration>

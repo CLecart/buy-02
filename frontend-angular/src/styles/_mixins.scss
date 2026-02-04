@@ -1,0 +1,268 @@
+/**
+ * @file _mixins.scss
+ * @description Reusable SCSS mixins for buy-02 design system.
+ *
+ * Mixins allow reusing complex style blocks and ensure
+ * consistency across the application.
+ */
+
+@use "variables" as *;
+
+// =============================================================================
+// BUTTONS
+// =============================================================================
+
+/// Base mixin for all buttons
+/// @param {Length} $padding-y [0.5rem] - Vertical padding
+/// @param {Length} $padding-x [1rem] - Horizontal padding
+@mixin button-base($padding-y: $spacing-sm, $padding-x: $spacing-md) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $padding-y $padding-x;
+  border: none;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color $transition-base,
+    opacity $transition-base;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/// Primary button
+@mixin button-primary {
+  @include button-base;
+  background-color: var(--primary-color);
+  color: var(--surface-color);
+
+  &:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+  }
+}
+
+/// Secondary button
+@mixin button-secondary {
+  @include button-base;
+  background-color: var(--text-muted);
+  color: var(--surface-color);
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+/// Danger button
+@mixin button-danger {
+  @include button-base;
+  background-color: var(--danger-color);
+  color: var(--surface-color);
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+/// Outline button
+@mixin button-outline($color-var: --primary-color) {
+  @include button-base;
+  background-color: transparent;
+  border: 1px solid var(#{$color-var});
+  color: var(#{$color-var});
+
+  &:hover:not(:disabled) {
+    background-color: var(#{$color-var});
+    color: var(--surface-color);
+  }
+}
+
+// =============================================================================
+// FORMS
+// =============================================================================
+
+/// Base style for inputs
+@mixin form-input {
+  width: 100%;
+  padding: $spacing-sm;
+  border: 1px solid var(--border-color);
+  border-radius: $border-radius-sm;
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  font-size: $font-size-base;
+  transition:
+    border-color $transition-base,
+    box-shadow $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+/// Form label
+@mixin form-label {
+  display: block;
+  margin-bottom: $spacing-xs;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+/// Form group
+@mixin form-group {
+  margin-bottom: $spacing-md;
+}
+
+// =============================================================================
+// CARDS AND SURFACES
+// =============================================================================
+
+/// Card/container with shadow
+@mixin card {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: $border-radius-md;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+/// Section with background
+@mixin section {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+// =============================================================================
+// MODALS
+// =============================================================================
+
+/// Modal overlay
+@mixin modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal;
+}
+
+/// Modal content
+@mixin modal-content {
+  background-color: var(--surface-color);
+  border-radius: $border-radius-md;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/// Modal header
+@mixin modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  border-bottom: 1px solid var(--border-color);
+
+  h3 {
+    margin: 0;
+    color: var(--text-color);
+  }
+}
+
+// =============================================================================
+// TABLES
+// =============================================================================
+
+/// Base table
+@mixin table-base {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text-color);
+
+  th,
+  td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  th {
+    background-color: var(--hover-bg);
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  tr:hover td {
+    background-color: var(--hover-bg);
+  }
+}
+
+// =============================================================================
+// UTILITIES
+// =============================================================================
+
+/// Truncated text with ellipsis
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Flex centering
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/// Responsive grid
+/// @param {Length} $min-width [250px] - Minimum column width
+/// @param {Length} $gap [1rem] - Gap between columns
+@mixin responsive-grid($min-width: 250px, $gap: $spacing-md) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax($min-width, 1fr));
+  gap: $gap;
+}
+
+// =============================================================================
+// RESPONSIVE
+// =============================================================================
+
+/// Mobile first media query
+/// @param {String} $breakpoint - Breakpoint name (sm, md, lg, xl)
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == sm {
+    @media (min-width: $breakpoint-sm) {
+      @content;
+    }
+  } @else if $breakpoint == md {
+    @media (min-width: $breakpoint-md) {
+      @content;
+    }
+  } @else if $breakpoint == lg {
+    @media (min-width: $breakpoint-lg) {
+      @content;
+    }
+  } @else if $breakpoint == xl {
+    @media (min-width: $breakpoint-xl) {
+      @content;
+    }
+  }
+}

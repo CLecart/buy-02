@@ -1,0 +1,183 @@
+/**
+ * @file styles.scss
+ * @description Main entry point for global styles in buy-02.
+ *
+ * This file imports SCSS modules and defines base styles.
+ * Variables and mixins are centralized in the styles/ folder.
+ *
+ * @structure
+ * - styles/_variables.scss : Design tokens (colors, spacing, etc.)
+ * - styles/_mixins.scss    : Reusable mixins
+ * - styles/_theme.scss     : Light/dark themes via CSS custom properties
+ */
+
+// =============================================================================
+// IMPORTS
+// =============================================================================
+
+@use "styles/variables" as *;
+@use "styles/theme";
+
+// =============================================================================
+// RESET AND BASE
+// =============================================================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  transition:
+    background-color $transition-slow,
+    color $transition-slow;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// =============================================================================
+// LINKS
+// =============================================================================
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color $transition-base;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// =============================================================================
+// UTILITY CLASSES - TEXT
+// =============================================================================
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-danger {
+  color: var(--danger-color);
+}
+
+.text-success {
+  color: var(--accent-color);
+}
+
+.text-warning {
+  color: var(--warning-color);
+}
+
+// =============================================================================
+// UTILITY CLASSES - MARGINS
+// =============================================================================
+
+.mt-1 {
+  margin-top: $spacing-xs;
+}
+
+.mt-2 {
+  margin-top: $spacing-sm;
+}
+
+.mt-3 {
+  margin-top: $spacing-md;
+}
+
+.mt-4 {
+  margin-top: $spacing-lg;
+}
+
+.mb-1 {
+  margin-bottom: $spacing-xs;
+}
+
+.mb-2 {
+  margin-bottom: $spacing-sm;
+}
+
+.mb-3 {
+  margin-bottom: $spacing-md;
+}
+
+.mb-4 {
+  margin-bottom: $spacing-lg;
+}
+
+// =============================================================================
+// UTILITY CLASSES - DISPLAY
+// =============================================================================
+
+.d-none {
+  display: none;
+}
+
+.d-block {
+  display: block;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.gap-1 {
+  gap: $spacing-xs;
+}
+
+.gap-2 {
+  gap: $spacing-sm;
+}
+
+.gap-3 {
+  gap: $spacing-md;
+}
+
+// =============================================================================
+// CUSTOM SCROLLBAR
+// =============================================================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: $border-radius-sm;
+
+  &:hover {
+    background: var(--text-muted);
+  }
+}

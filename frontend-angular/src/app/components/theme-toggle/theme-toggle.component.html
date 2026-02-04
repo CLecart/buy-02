@@ -1,0 +1,10 @@
+<!-- Theme toggle button for dark/light mode -->
+<button
+  class="theme-toggle"
+  (click)="toggleTheme()"
+  [attr.aria-label]="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+  [title]="isDark ? 'Light mode' : 'Dark mode'"
+>
+  <span class="icon" *ngIf="isDark">☀️</span>
+  <span class="icon" *ngIf="!isDark">🌙</span>
+</button>

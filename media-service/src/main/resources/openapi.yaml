@@ -1,0 +1,122 @@
+openapi: 3.1.0
+info:
+  title: media-service API
+  version: 0.1.0
+
+paths:
+  /api/media:
+    post:
+      summary: Upload media (multipart)
+      operationId: uploadMedia
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                productId:
+                  type: string
+                ownerId:
+                  type: string
+            encoding:
+              file:
+                contentType: image/*
+      description: |
+        Upload a media file. Server-side constraints:
+        - Maximum file size: 2 MB.
+        - Allowed image types (checked via Apache Tika): image/png, image/jpeg, image/gif.
+        - Fields: `file` (binary), optional `productId`, optional `ownerId`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaMetadata"
+
+  /api/media/{id}:
+    get:
+      summary: Get media metadata by id
+      operationId: getMediaById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Media metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaMetadata"
+        "404":
+          description: Not found
+
+    delete:
+      summary: Delete media by id (owner only)
+      operationId: deleteMediaById
+      security:
+        - bearerAuth: []
+      description: |
+        Delete a media resource. Only the `ownerId` recorded with the media may delete it.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden — not the owner
+        "404":
+          description: Not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    MediaMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+        ownerId:
+          type: string
+        productId:
+          type: string
+        filename:
+          type: string
+        originalName:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        checksum:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
