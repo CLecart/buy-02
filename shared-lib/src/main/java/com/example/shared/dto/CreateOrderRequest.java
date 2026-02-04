@@ -15,6 +15,10 @@ public record CreateOrderRequest(
         @NotBlank(message = "Buyer ID is required")
         String buyerId,
 
+        @NotBlank(message = "Buyer email is required")
+        @Email(message = "Buyer email must be valid")
+        String buyerEmail,
+
         @NotEmpty(message = "Order must contain at least one item")
         @Valid
         List<OrderItemRequest> items,
