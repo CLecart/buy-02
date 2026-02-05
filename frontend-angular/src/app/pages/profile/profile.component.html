@@ -1,0 +1,36 @@
+<div class="container" *ngIf="currentUser">
+  <h1>Profile</h1>
+
+  <section class="card" *ngIf="userProfile">
+    <h2>Buyer Overview</h2>
+    <p>Total orders: {{ userProfile.totalOrders }}</p>
+    <p>Total spent: {{ userProfile.totalSpent | currency }}</p>
+    <p>Average order value: {{ userProfile.averageOrderValue | currency }}</p>
+
+    <div *ngIf="userProfile.mostPurchasedProductIds?.length">
+      <h3>Most Purchased Products</h3>
+      <ul>
+        <li *ngFor="let productId of userProfile.mostPurchasedProductIds">
+          {{ productId }}
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card" *ngIf="sellerProfile">
+    <h2>Seller Overview</h2>
+    <p>Store: {{ sellerProfile.storeName }}</p>
+    <p>Total products sold: {{ sellerProfile.totalProductsSold }}</p>
+    <p>Total revenue: {{ sellerProfile.totalRevenue | currency }}</p>
+    <p>Average rating: {{ sellerProfile.averageRating }}</p>
+
+    <div *ngIf="sellerProfile.bestSellingProductIds?.length">
+      <h3>Best Selling Products</h3>
+      <ul>
+        <li *ngFor="let productId of sellerProfile.bestSellingProductIds">
+          {{ productId }}
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>

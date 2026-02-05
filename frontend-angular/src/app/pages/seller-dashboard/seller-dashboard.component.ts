@@ -22,7 +22,13 @@ import { User } from "../../models/user.model";
 export class SellerDashboardComponent implements OnInit {
   currentUser: User | null = null;
   myProducts: Product[] = [];
-  productForm: Product = { name: "", price: 0, description: "", quantity: 0 };
+  productForm: Product = {
+    name: "",
+    price: 0,
+    description: "",
+    quantity: 0,
+    category: "",
+  };
   editingProduct: Product | null = null;
 
   // Media manager
@@ -31,10 +37,10 @@ export class SellerDashboardComponent implements OnInit {
   uploadError = "";
 
   constructor(
-    private productService: ProductService,
-    private mediaService: MediaService,
-    private authService: AuthService,
-    private router: Router
+    private readonly productService: ProductService,
+    private readonly mediaService: MediaService,
+    private readonly authService: AuthService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +58,9 @@ export class SellerDashboardComponent implements OnInit {
   }
 
   loadMyProducts(): void {
-    this.productService.getProducts(0, 100).subscribe({
+    this.productService
+      .getProducts(0, 100, { sellerId: this.currentUser?.id })
+      .subscribe({
       next: (page: Page<Product>) => {
         // Filter to only show user's products
         this.myProducts = page.content.filter(
@@ -85,6 +93,7 @@ export class SellerDashboardComponent implements OnInit {
             price: 0,
             description: "",
             quantity: 0,
+            category: "",
           };
         },
         error: (err: { error?: { message?: string }; message?: string }) =>
@@ -102,7 +111,13 @@ export class SellerDashboardComponent implements OnInit {
 
   cancelEdit(): void {
     this.editingProduct = null;
-    this.productForm = { name: "", price: 0, description: "", quantity: 0 };
+    this.productForm = {
+      name: "",
+      price: 0,
+      description: "",
+      quantity: 0,
+      category: "",
+    };
   }
 
   deleteProduct(product: Product): void {
@@ -120,8 +135,8 @@ export class SellerDashboardComponent implements OnInit {
   // Avatar upload
   onAvatarSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
+    const file = input.files?.[0];
+    if (file) {
       const error = this.mediaService.validateFile(file);
       if (error) {
         alert(error);
@@ -146,6 +161,12 @@ export class SellerDashboardComponent implements OnInit {
   closeMediaManager(): void {
     this.selectedProductForMedia = null;
     this.productMedia = [];
+  }
+
+  onModalBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeMediaManager();
+    }
   }
 
   loadProductMedia(): void {

@@ -81,6 +81,7 @@ pipeline {
                     docker build -t ${DOCKER_REGISTRY}/buy-02-user-service:${BUILD_NUMBER} ./user-service
                     docker build -t ${DOCKER_REGISTRY}/buy-02-product-service:${BUILD_NUMBER} ./product-service
                     docker build -t ${DOCKER_REGISTRY}/buy-02-media-service:${BUILD_NUMBER} ./media-service
+                    docker build -t ${DOCKER_REGISTRY}/buy-02-order-service:${BUILD_NUMBER} ./order-service
                     docker build -t ${DOCKER_REGISTRY}/buy-02-frontend:${BUILD_NUMBER} ./frontend-angular
                 '''
             }
@@ -97,6 +98,7 @@ pipeline {
                     docker push ${DOCKER_REGISTRY}/buy-02-user-service:${BUILD_NUMBER}
                     docker push ${DOCKER_REGISTRY}/buy-02-product-service:${BUILD_NUMBER}
                     docker push ${DOCKER_REGISTRY}/buy-02-media-service:${BUILD_NUMBER}
+                    docker push ${DOCKER_REGISTRY}/buy-02-order-service:${BUILD_NUMBER}
                     docker push ${DOCKER_REGISTRY}/buy-02-frontend:${BUILD_NUMBER}
                 '''
             }

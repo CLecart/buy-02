@@ -31,6 +31,8 @@ public class Order {
     @Indexed
     private String buyerId;
 
+    private String buyerEmail;
+
     private List<OrderItem> items;
 
     private BigDecimal totalPrice;

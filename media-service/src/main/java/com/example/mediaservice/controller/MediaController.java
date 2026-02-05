@@ -46,6 +46,7 @@ public class MediaController {
 
     /** Maximum allowed page size for listing endpoints (protects the service from large responses). */
     private static final int MAX_PAGE_SIZE = 200;
+    private static final long MAX_UPLOAD_BYTES = 2L * 1024L * 1024L;
 
     public MediaController(StorageService storageService, com.example.mediaservice.client.ProductClient productClient,
                            com.example.mediaservice.repository.MediaRepository mediaRepository) {
@@ -60,36 +61,16 @@ public class MediaController {
                                                       @RequestParam(name = "productId", required = false) String productId,
                                                       @RequestParam(name = "ownerId", required = false) String ownerId) {
         /* Quick preflight: if client supplied Content-Length header and it's larger than 2MB, reject early. */
-        String cl = request.getHeader("Content-Length");
-        if (cl != null && !cl.isBlank()) {
-            try {
-                long contentLength = Long.parseLong(cl);
-                long max = 2L * 1024L * 1024L;
-                if (contentLength > max) {
-                    throw new IllegalArgumentException("Uploaded file exceeds maximum allowed size of 2MB");
-                }
-            } catch (NumberFormatException ignored) {
-            }
+        Long contentLength = parseContentLength(request.getHeader("Content-Length"));
+        if (contentLength != null && contentLength > MAX_UPLOAD_BYTES) {
+            throw new IllegalArgumentException("Uploaded file exceeds maximum allowed size of 2MB");
         }
         /* If the request is authenticated, prefer the authenticated principal as ownerId. */
-        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof String) {
-            ownerId = (String) auth.getPrincipal();
-        }
+        ownerId = resolveOwnerId(ownerId);
 
         /* If productId is provided, validate ownership via product-service (best-effort). */
-        if (productId != null && !productId.isBlank()) {
-            try {
-                String productOwner = productClient.getOwnerId(productId);
-                if (productOwner == null || !productOwner.equals(ownerId)) {
-                    return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
-                }
-            } catch (org.springframework.web.client.HttpClientErrorException.NotFound nf) {
-                return ResponseEntity.badRequest().build();
-            } catch (Exception ex) {
-                return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_GATEWAY).build();
-            }
-        }
+        ResponseEntity<MediaUploadResponse> ownerCheck = validateProductOwnership(productId, ownerId);
+        if (ownerCheck != null) return ownerCheck;
 
         // Store the file and get the media entity with ID
         com.example.mediaservice.model.MediaFile media = storageService.storeAndGetMedia(file, ownerId, productId);
@@ -118,22 +99,7 @@ public class MediaController {
             if (!resource.exists() || !resource.isReadable()) {
                 return ResponseEntity.notFound().build();
             }
-            String contentType = null;
-            try {
-                contentType = tika.detect(path);
-            } catch (Exception ignored) {
-                try {
-                    contentType = Files.probeContentType(path);
-                } catch (IOException e) {
-                }
-            }
-            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
-            if (contentType != null) {
-                try {
-                    mediaType = MediaType.parseMediaType(contentType);
-                } catch (Exception ignored) {
-                }
-            }
+            MediaType mediaType = detectMediaType(path);
             return ResponseEntity.ok().contentType(Objects.requireNonNull(mediaType)).body(resource);
         } catch (MalformedURLException e) {
             return ResponseEntity.internalServerError().build();
@@ -168,19 +134,12 @@ public class MediaController {
             log.debug("Invalid pagination parameters: page={}, size={}", page, size);
             return ResponseEntity.badRequest().build();
         }
-        org.springframework.data.domain.Sort.Order order = org.springframework.data.domain.Sort.Order.by("uploadedAt");
-
-        
-        final String[] parts = (sort == null) ? new String[0] : sort.split(",");
-        if (parts.length >= 1) {
-            String prop = parts[0];
-            if (prop != null && !prop.isBlank()) {
-                org.springframework.data.domain.Sort.Direction dir = org.springframework.data.domain.Sort.Direction.DESC;
-                if (parts.length >= 2 && "asc".equalsIgnoreCase(parts[1])) dir = org.springframework.data.domain.Sort.Direction.ASC;
-                order = new org.springframework.data.domain.Sort.Order(dir, java.util.Objects.requireNonNull(prop));
-            }
-        }
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(order));
+        org.springframework.data.domain.Sort.Order order = parseSortOrder(sort);
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page,
+            size,
+            org.springframework.data.domain.Sort.by(order)
+        );
 
         org.springframework.data.domain.Page<com.example.mediaservice.model.MediaFile> pageRes;
         if (productId != null && !productId.isBlank()) {
@@ -191,12 +150,9 @@ public class MediaController {
             pageRes = mediaRepository.findAll(pageable);
         }
 
-        java.util.List<com.example.mediaservice.dto.MediaMetadataDto> dtos = new java.util.ArrayList<>();
-        for (var m : pageRes.getContent()) {
-                dtos.add(new com.example.mediaservice.dto.MediaMetadataDto(
-                    m.getId(), m.getOwnerId(), m.getProductId(), m.getFilename(), m.getOriginalName(), m.getMimeType(), m.getSize(), m.getChecksum(), m.getUploadedAt(), m.getWidth(), m.getHeight()
-                ));
-        }
+        java.util.List<com.example.mediaservice.dto.MediaMetadataDto> dtos = pageRes.getContent().stream()
+            .map(this::toMetadataDto)
+            .toList();
 
         com.example.mediaservice.dto.PagedResponse<com.example.mediaservice.dto.MediaMetadataDto> resp = new com.example.mediaservice.dto.PagedResponse<>(
                 dtos, pageRes.getTotalElements(), pageRes.getTotalPages(), pageRes.getNumber(), pageRes.getSize()
@@ -224,8 +180,7 @@ public class MediaController {
         if (maybe.isEmpty()) return ResponseEntity.notFound().build();
         var m = maybe.get();
 
-        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        String principal = (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof String) ? (String) auth.getPrincipal() : null;
+        String principal = resolvePrincipal();
         if (principal == null || !principal.equals(m.getOwnerId())) {
             return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
         }
@@ -244,5 +199,102 @@ public class MediaController {
             return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         return ResponseEntity.noContent().build();
+    }
+
+    private Long parseContentLength(String headerValue) {
+        if (headerValue == null || headerValue.isBlank()) return null;
+        try {
+            return Long.parseLong(headerValue);
+        } catch (NumberFormatException ex) {
+            log.debug("Invalid Content-Length header: {}", headerValue, ex);
+            return null;
+        }
+    }
+
+    private String resolveOwnerId(String currentOwnerId) {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof String principal) {
+            return principal;
+        }
+        return currentOwnerId;
+    }
+
+    private String resolvePrincipal() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof String principal) {
+            return principal;
+        }
+        return null;
+    }
+
+    private ResponseEntity<MediaUploadResponse> validateProductOwnership(String productId, String ownerId) {
+        if (productId == null || productId.isBlank()) return null;
+        try {
+            String productOwner = productClient.getOwnerId(productId);
+            if (productOwner == null || !productOwner.equals(ownerId)) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            }
+        } catch (org.springframework.web.client.HttpClientErrorException.NotFound nf) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_GATEWAY).build();
+        }
+        return null;
+    }
+
+    private MediaType detectMediaType(Path path) {
+        String contentType = null;
+        try {
+            contentType = tika.detect(path);
+        } catch (Exception ex) {
+            log.debug("Tika detection failed for {}", path, ex);
+        }
+        if (contentType == null) {
+            try {
+                contentType = Files.probeContentType(path);
+            } catch (IOException ex) {
+                log.debug("Failed to probe content type for {}", path, ex);
+            }
+        }
+        if (contentType != null) {
+            try {
+                return MediaType.parseMediaType(contentType);
+            } catch (Exception ex) {
+                log.debug("Invalid media type {}, falling back to octet-stream", contentType, ex);
+            }
+        }
+        return MediaType.APPLICATION_OCTET_STREAM;
+    }
+
+    private org.springframework.data.domain.Sort.Order parseSortOrder(String sort) {
+        org.springframework.data.domain.Sort.Order order = org.springframework.data.domain.Sort.Order.by("uploadedAt");
+        String[] parts = (sort == null) ? new String[0] : sort.split(",");
+        if (parts.length >= 1) {
+            String prop = parts[0];
+            if (prop != null && !prop.isBlank()) {
+                org.springframework.data.domain.Sort.Direction dir = org.springframework.data.domain.Sort.Direction.DESC;
+                if (parts.length >= 2 && "asc".equalsIgnoreCase(parts[1])) {
+                    dir = org.springframework.data.domain.Sort.Direction.ASC;
+                }
+                order = new org.springframework.data.domain.Sort.Order(dir, java.util.Objects.requireNonNull(prop));
+            }
+        }
+        return order;
+    }
+
+    private com.example.mediaservice.dto.MediaMetadataDto toMetadataDto(com.example.mediaservice.model.MediaFile m) {
+        return new com.example.mediaservice.dto.MediaMetadataDto(
+            m.getId(),
+            m.getOwnerId(),
+            m.getProductId(),
+            m.getFilename(),
+            m.getOriginalName(),
+            m.getMimeType(),
+            m.getSize(),
+            m.getChecksum(),
+            m.getUploadedAt(),
+            m.getWidth(),
+            m.getHeight()
+        );
     }
 }

@@ -89,6 +89,22 @@ services:
       - product-service
       - kafka
 
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_DATA_MONGODB_URI=${MONGO_URI}
+      - APP_JWT_SECRET=${APP_JWT_SECRET}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SSL_ENABLED=${SSL_ENABLED:-false}
+    ports:
+      - "8084:8080"
+      - "8447:8443"
+    depends_on:
+      - mongo
+      - kafka
+
   frontend:
     build:
       context: ./frontend-angular
@@ -99,6 +115,7 @@ services:
       - user-service
       - product-service
       - media-service
+      - order-service
 
 volumes:
   mongo-data:

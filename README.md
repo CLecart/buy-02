@@ -5,8 +5,10 @@ An end-to-end e-commerce platform built with **Spring Boot 3.x microservices** a
 ## Features
 
 - **User Management**: Registration as CLIENT or SELLER, JWT authentication, avatar upload for sellers
-- **Product Management**: Full CRUD operations (SELLER only), ownership enforcement
+- **Product Management**: Full CRUD operations (SELLER only), ownership enforcement, search/filtering
 - **Media Management**: Image uploads with 2MB limit, type validation (JPEG, PNG, GIF)
+- **Orders & Cart**: Shopping cart, order creation, cancellation, redo, and status tracking
+- **Profiles**: Buyer and seller analytics (top products, spending/revenue)
 - **Event-Driven Architecture**: Kafka for inter-service communication (cascade deletions)
 - **Security**: BCrypt password hashing, role-based access control, HTTPS support
 - **Frontend**: Angular SPA with authentication, product listing, seller dashboard
@@ -23,6 +25,7 @@ buy-02/
 ├── user-service/               # Auth & user management (port 8081)
 ├── product-service/            # Product CRUD (port 8082)
 ├── media-service/              # Media uploads (port 8083)
+├── order-service/              # Orders & cart (port 8084)
 └── frontend-angular/           # Angular 17+ SPA (port 4200)
 ```
 
@@ -53,6 +56,7 @@ docker compose -f docker-compose.dev.yml up -d --build
 # - User Service:    http://localhost:8081
 # - Product Service: http://localhost:8082
 # - Media Service:   http://localhost:8083
+# - Order Service:   http://localhost:8084
 ```
 
 ### Run Locally (Development)
@@ -69,6 +73,7 @@ export MONGO_URI='mongodb://root:example@localhost:27018/buy02?authSource=admin'
 mvn -pl user-service spring-boot:run
 mvn -pl product-service spring-boot:run -Dspring-boot.run.arguments="--server.port=8082"
 mvn -pl media-service spring-boot:run -Dspring-boot.run.arguments="--server.port=8083"
+mvn -pl order-service spring-boot:run -Dspring-boot.run.arguments="--server.port=8084"
 
 # Run frontend
 cd frontend-angular && npm install && npm start
@@ -138,6 +143,21 @@ mvn clean verify
 | GET    | `/api/media/{id}`         | Get media file     | -            |
 | GET    | `/api/media/product/{id}` | List product media | -            |
 | DELETE | `/api/media/{id}`         | Delete media       | JWT + OWNER  |
+
+### Order Service (8084)
+
+| Method | Endpoint                       | Description           | Auth        |
+| ------ | ------------------------------ | --------------------- | ----------- |
+| GET    | `/api/orders/me`               | List my orders        | JWT         |
+| GET    | `/api/orders/seller/me`        | List seller orders    | JWT + SELLER|
+| POST   | `/api/orders`                  | Create order          | JWT         |
+| PATCH  | `/api/orders/{id}/cancel`      | Cancel order          | JWT         |
+| POST   | `/api/orders/{id}/redo`        | Redo order            | JWT         |
+| DELETE | `/api/orders/{id}`             | Remove order          | JWT         |
+| GET    | `/api/carts/me`                | Get my cart           | JWT         |
+| POST   | `/api/carts/me/items`          | Add to cart           | JWT         |
+| PATCH  | `/api/carts/me/items/{id}`     | Update cart quantity  | JWT         |
+| DELETE | `/api/carts/me/items/{id}`     | Remove cart item      | JWT         |
 
 ## Architecture
 

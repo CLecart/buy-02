@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * UserProfile entity representing extended profile information for customers.
@@ -51,6 +53,8 @@ public class UserProfile {
 
     private List<String> mostPurchasedProductIds;
 
+    private Map<String, Integer> purchasedProductCounts;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -65,6 +69,7 @@ public class UserProfile {
         this.totalOrders = 0;
         this.totalSpent = BigDecimal.ZERO;
         this.averageOrderValue = BigDecimal.ZERO;
+        this.purchasedProductCounts = new HashMap<>();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

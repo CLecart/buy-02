@@ -1,6 +1,7 @@
 package com.example.productservice.service;
 
 import com.example.productservice.dto.ProductDto;
+import com.example.productservice.dto.ProductSearchRequest;
 import com.example.productservice.model.Product;
 import com.example.productservice.repository.ProductRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -21,12 +22,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @Tag("integration")
-public class ProductServiceIntegrationTest {
+class ProductServiceIntegrationTest {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0.8");
 
-    static String TEST_JWT_SECRET;
+    static String testJwtSecret;
 
     @DynamicPropertySource
     static void props(DynamicPropertyRegistry r) {
@@ -34,8 +35,8 @@ public class ProductServiceIntegrationTest {
         
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        r.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        r.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
     @Autowired
@@ -81,10 +82,10 @@ public class ProductServiceIntegrationTest {
     void listProducts_delegatesToRepository_and_searches() {
         productRepository.save(new Product("Apple", "a", BigDecimal.ONE, "o1"));
         productRepository.save(new Product("Banana", "b", BigDecimal.valueOf(2), "o2"));
-        var page = productService.listProducts(0, 10, null);
+        var page = productService.listProducts(0, 10, new ProductSearchRequest(null, null, null, null, null, null));
         assertThat(page.getTotalElements()).isEqualTo(2);
 
-        var search = productService.listProducts(0, 10, "ap");
+        var search = productService.listProducts(0, 10, new ProductSearchRequest("ap", null, null, null, null, null));
         assertThat(search.getTotalElements()).isEqualTo(1);
     }
 }

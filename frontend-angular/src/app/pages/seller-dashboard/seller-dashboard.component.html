@@ -80,6 +80,15 @@
             step="1"
           />
         </div>
+        <div class="form-group">
+          <label for="category">Category</label>
+          <input
+            type="text"
+            id="category"
+            [(ngModel)]="productForm.category"
+            name="category"
+          />
+        </div>
       </div>
       <div class="form-group">
         <label for="description">Description</label>
@@ -119,6 +128,7 @@
         <thead>
           <tr>
             <th>Name</th>
+            <th>Category</th>
             <th>Price</th>
             <th>Quantity</th>
             <th>Media</th>
@@ -128,6 +138,7 @@
         <tbody>
           <tr *ngFor="let product of myProducts">
             <td>{{ product.name }}</td>
+            <td>{{ product.category || "-" }}</td>
             <td>{{ product.price | currency }}</td>
             <td>{{ product.quantity || 0 }}</td>
             <td>
@@ -166,12 +177,14 @@
   </section>
 
   <!-- Media Manager Modal -->
-  <div
+  <dialog
     class="modal"
     *ngIf="selectedProductForMedia"
-    (click)="closeMediaManager()"
+    open
+    (click)="onModalBackdropClick($event)"
+    (keydown.escape)="closeMediaManager()"
   >
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content">
       <div class="modal-header">
         <h3>Media for: {{ selectedProductForMedia.name }}</h3>
         <button class="close-btn" (click)="closeMediaManager()">&times;</button>
@@ -212,5 +225,5 @@
         </p>
       </div>
     </div>
-  </div>
+  </dialog>
 </div>

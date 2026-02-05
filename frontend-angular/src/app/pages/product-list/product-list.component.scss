@@ -54,6 +54,7 @@
   display: flex;
   gap: $spacing-sm;
   margin-bottom: $spacing-lg;
+  flex-wrap: wrap;
 
   input {
     flex: 1;
@@ -84,6 +85,19 @@
       background: var(--primary-hover);
     }
   }
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-color);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
 }
 
 // =============================================================================
@@ -131,6 +145,13 @@
     margin: 0 0 $spacing-sm;
     color: var(--text-color);
   }
+}
+
+.category,
+.stock {
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+  margin-bottom: $spacing-sm;
 }
 
 .description {

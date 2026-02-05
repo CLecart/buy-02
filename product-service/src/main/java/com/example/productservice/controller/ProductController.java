@@ -3,6 +3,7 @@ package com.example.productservice.controller;
 import com.example.productservice.dto.ProductDto;
 import com.example.productservice.model.Product;
 import com.example.productservice.service.ProductService;
+import com.example.productservice.dto.ProductSearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,26 +49,26 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> get(@PathVariable("id") @org.springframework.lang.NonNull String id) {
-        id = java.util.Objects.requireNonNull(id);
-        Product p = productService.getById(id);
+        String resolvedId = java.util.Objects.requireNonNull(id);
+        Product p = productService.getById(resolvedId);
         if (p == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(toDto(p));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> update(@PathVariable("id") @org.springframework.lang.NonNull String id, @org.springframework.validation.annotation.Validated @org.springframework.web.bind.annotation.RequestBody ProductDto req) {
-        id = java.util.Objects.requireNonNull(id);
+        String resolvedId = java.util.Objects.requireNonNull(id);
         String userId = getCurrentUserId();
-        Product saved = productService.updateProduct(id, req, userId);
+        Product saved = productService.updateProduct(resolvedId, req, userId);
         if (saved == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         return ResponseEntity.ok(toDto(saved));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") @org.springframework.lang.NonNull String id) {
-        id = java.util.Objects.requireNonNull(id);
+        String resolvedId = java.util.Objects.requireNonNull(id);
         String userId = getCurrentUserId();
-        boolean ok = productService.deleteProduct(id, userId);
+        boolean ok = productService.deleteProduct(resolvedId, userId);
         if (!ok) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         return ResponseEntity.noContent().build();
     }
@@ -76,9 +77,15 @@ public class ProductController {
     public ResponseEntity<Page<ProductDto>> list(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size,
-        @RequestParam(name = "search", required = false) String search
+        @RequestParam(name = "search", required = false) String search,
+        @RequestParam(name = "category", required = false) String category,
+        @RequestParam(name = "minPrice", required = false) java.math.BigDecimal minPrice,
+        @RequestParam(name = "maxPrice", required = false) java.math.BigDecimal maxPrice,
+        @RequestParam(name = "sellerId", required = false) String sellerId,
+        @RequestParam(name = "inStock", required = false) Boolean inStock
     ) {
-        Page<ProductDto> p = productService.listProducts(page, size, search);
+        ProductSearchRequest filter = new ProductSearchRequest(search, category, minPrice, maxPrice, sellerId, inStock);
+        Page<ProductDto> p = productService.listProducts(page, size, filter);
         return ResponseEntity.ok(p);
     }
 
@@ -112,6 +119,7 @@ public class ProductController {
 
     private ProductDto toDto(Product p) {
         ProductDto dto = new ProductDto(p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getOwnerId(), p.getMediaIds());
+        dto.setCategory(p.getCategory());
         dto.setQuantity(p.getQuantity());
         return dto;
     }

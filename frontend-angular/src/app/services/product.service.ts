@@ -12,7 +12,7 @@ import { Product, Page } from "../models/product.model";
 export class ProductService {
   private readonly API_URL = "/api/products";
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Get all products with pagination.
@@ -20,14 +20,41 @@ export class ProductService {
   getProducts(
     page: number = 0,
     size: number = 10,
-    search?: string
+    filters: {
+      search?: string;
+      category?: string;
+      minPrice?: number;
+      maxPrice?: number;
+      sellerId?: string;
+      inStock?: boolean;
+    } = {}
   ): Observable<Page<Product>> {
     let params = new HttpParams()
       .set("page", page.toString())
       .set("size", size.toString());
 
-    if (search) {
-      params = params.set("search", search);
+    if (filters.search) {
+      params = params.set("search", filters.search);
+    }
+
+    if (filters.category) {
+      params = params.set("category", filters.category);
+    }
+
+    if (filters.minPrice !== undefined) {
+      params = params.set("minPrice", filters.minPrice.toString());
+    }
+
+    if (filters.maxPrice !== undefined) {
+      params = params.set("maxPrice", filters.maxPrice.toString());
+    }
+
+    if (filters.sellerId) {
+      params = params.set("sellerId", filters.sellerId);
+    }
+
+    if (filters.inStock !== undefined) {
+      params = params.set("inStock", filters.inStock.toString());
     }
 
     return this.http.get<Page<Product>>(this.API_URL, { params });

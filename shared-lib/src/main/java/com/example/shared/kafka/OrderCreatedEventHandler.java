@@ -2,6 +2,7 @@ package com.example.shared.kafka;
 
 import com.example.shared.event.OrderCreatedEvent;
 import com.example.shared.exception.EventProcessingException;
+import com.example.shared.model.OrderItem;
 import com.example.shared.service.SellerProfileService;
 import com.example.shared.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
@@ -30,15 +31,26 @@ public class OrderCreatedEventHandler {
         log.info("Handling OrderCreatedEvent: {}", event.orderId());
 
         try {
+            var items = event.items().stream()
+                    .map(item -> new OrderItem(
+                            item.productId(),
+                            item.sellerId(),
+                            item.productName(),
+                            item.quantity(),
+                            item.price()
+                    ))
+                    .toList();
+
             // Update user profile with new order
-            userProfileService.recordNewOrder(event.buyerId(), event.totalPrice());
+            userProfileService.recordNewOrder(event.buyerId(), event.totalPrice(), items);
 
             // Update seller profiles with new sales
             event.items().forEach(item ->
                 sellerProfileService.recordSale(
                     item.sellerId(),
                     item.quantity(),
-                    item.subtotal()
+                    item.subtotal(),
+                    item.productId()
                 )
             );
 

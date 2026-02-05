@@ -20,20 +20,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 @Tag("integration")
-public class MediaControllerPaginationValidationIntegrationTest {
+class MediaControllerPaginationValidationIntegrationTest {
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0.8");
 
-    static String TEST_JWT_SECRET;
+    static String testJwtSecret;
 
     @DynamicPropertySource
     static void props(DynamicPropertyRegistry r) {
         r.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        r.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        r.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
     @Autowired
