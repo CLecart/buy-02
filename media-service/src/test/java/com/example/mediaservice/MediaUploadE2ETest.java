@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.startsWith;
 @AutoConfigureMockMvc(addFilters = false)
 @TestPropertySource(properties = {"APP_JWT_SECRET=0123456789abcdef0123456789abcdef"})
 @SuppressWarnings("null")
-public class MediaUploadE2ETest {
+class MediaUploadE2ETest {
 
     @Autowired
     MockMvc mvc;
