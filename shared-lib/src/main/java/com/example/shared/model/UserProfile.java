@@ -103,6 +103,7 @@ public class UserProfile {
                 ", lastName='" + lastName + '\'' +
                 ", totalOrders=" + totalOrders +
                 ", totalSpent=" + totalSpent +
+                ", lastOrderDate=" + lastOrderDate +
                 ", createdAt=" + createdAt +
                 '}';
     }
