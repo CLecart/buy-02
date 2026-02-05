@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Only SELLER role should be able to create/update/delete products.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class RoleBasedAccessControlTest {
+class RoleBasedAccessControlTest {
 
     static final MongoDBContainer MONGO_CONTAINER = new MongoDBContainer(
             DockerImageName.parse("mongo:6.0")
