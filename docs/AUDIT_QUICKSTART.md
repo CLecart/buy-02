@@ -48,7 +48,7 @@ export APP_JWT_SECRET=$(cat /tmp/audit_jwt_secret)
 export MONGO_URI='mongodb://localhost:27017/buy02'
 ```
 
-2. Lancer les services (3 terminaux séparés ou en background) :
+2. Lancer les services (4 terminaux séparés ou en background) :
 
 ```bash
 # user-service (port 8081)
@@ -59,6 +59,9 @@ APP_JWT_SECRET="$APP_JWT_SECRET" MONGO_URI="$MONGO_URI" mvn -pl product-service 
 
 # media-service (port 8083)
 APP_JWT_SECRET="$APP_JWT_SECRET" MONGO_URI="$MONGO_URI" mvn -pl media-service spring-boot:run -Dspring-boot.run.arguments="--server.port=8083"
+
+# order-service (port 8084)
+APP_JWT_SECRET="$APP_JWT_SECRET" MONGO_URI="$MONGO_URI" mvn -pl order-service spring-boot:run -Dspring-boot.run.arguments="--server.port=8084"
 ```
 
 3. Exécuter le smoke-test (exemple inline ou script) :
@@ -111,7 +114,18 @@ sha256sum out/audit-smoke-*.tar.gz > out/audit-smoke.sha256
 pkill -f 'user-service' || true
 pkill -f 'product-service' || true
 pkill -f 'media-service' || true
+pkill -f 'order-service' || true
 shred -u /tmp/audit_jwt_secret || rm -f /tmp/audit_jwt_secret
+```
+
+---
+
+## Tests d'integration (Testcontainers)
+
+Prerequis : Docker en fonctionnement.
+
+```bash
+mvn verify -Pintegration
 ```
 
 ---
