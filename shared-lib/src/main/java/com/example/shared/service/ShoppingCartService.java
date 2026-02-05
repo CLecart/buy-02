@@ -49,7 +49,7 @@ public class ShoppingCartService {
         ShoppingCart newCart = new ShoppingCart();
         newCart.setId(UUID.randomUUID().toString());
         newCart.setUserId(userId);
-        newCart.setItems(java.util.Collections.emptyList());
+        newCart.setItems(new java.util.ArrayList<>());
         newCart.setTotalPrice(BigDecimal.ZERO);
         newCart.setItemCount(0);
         newCart.setCreatedAt(LocalDateTime.now());
@@ -89,6 +89,10 @@ public class ShoppingCartService {
                 .orElseGet(() -> createNewCart(userId));
 
         // Check if item already exists
+        if (cart.getItems() == null) {
+            cart.setItems(new java.util.ArrayList<>());
+        }
+
         Optional<CartItem> existingItem = cart.getItems().stream()
                 .filter(item -> item.getProductId().equals(request.productId())
                         && item.getSellerId().equals(request.sellerId()))
@@ -217,7 +221,7 @@ public class ShoppingCartService {
         ShoppingCart newCart = new ShoppingCart();
         newCart.setId(UUID.randomUUID().toString());
         newCart.setUserId(userId);
-        newCart.setItems(java.util.Collections.emptyList());
+        newCart.setItems(new java.util.ArrayList<>());
         newCart.setTotalPrice(BigDecimal.ZERO);
         newCart.setItemCount(0);
         newCart.setCreatedAt(LocalDateTime.now());

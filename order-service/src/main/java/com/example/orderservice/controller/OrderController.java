@@ -3,6 +3,7 @@ package com.example.orderservice.controller;
 import com.example.shared.dto.CreateOrderRequest;
 import com.example.shared.dto.OrderDTO;
 import com.example.shared.dto.UpdateOrderStatusRequest;
+import com.example.shared.exception.UnauthorizedException;
 import com.example.shared.model.OrderStatus;
 import com.example.shared.service.OrderService;
 import jakarta.validation.Valid;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -35,8 +38,22 @@ public class OrderController {
      */
     @PostMapping
     public ResponseEntity<OrderDTO> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        log.info("POST /api/orders - Creating new order for buyer: {}", request.buyerId());
-        OrderDTO createdOrder = orderService.createOrder(request);
+        String buyerId = getCurrentUserId();
+        log.info("POST /api/orders - Creating new order for buyer: {}", buyerId);
+
+        if (buyerId.isBlank()) {
+            throw new UnauthorizedException("Authentication required");
+        }
+
+        CreateOrderRequest safeRequest = new CreateOrderRequest(
+                buyerId,
+                request.buyerEmail(),
+                request.items(),
+                request.paymentMethod(),
+                request.shippingAddress()
+        );
+
+        OrderDTO createdOrder = orderService.createOrder(safeRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
@@ -48,10 +65,41 @@ public class OrderController {
      * @return order DTO
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDTO> getOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderDTO> getOrder(@PathVariable @NonNull String orderId) {
         log.info("GET /api/orders/{} - Fetching order", orderId);
         OrderDTO order = orderService.getOrderById(orderId);
+        enforceOrderAccess(order);
         return ResponseEntity.ok(order);
+    }
+
+    /**
+     * Get orders for the current buyer.
+     * GET /api/orders/me
+     */
+    @GetMapping("/me")
+    public ResponseEntity<Page<OrderDTO>> getMyOrders(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) OrderStatus status,
+            Pageable pageable
+    ) {
+        String buyerId = getCurrentUserId();
+        Page<OrderDTO> orders = orderService.getOrdersByBuyer(buyerId, pageable, search, status);
+        return ResponseEntity.ok(orders);
+    }
+
+    /**
+     * Get orders for the current seller.
+     * GET /api/orders/seller/me
+     */
+    @GetMapping("/seller/me")
+    public ResponseEntity<Page<OrderDTO>> getMySellerOrders(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) OrderStatus status,
+            Pageable pageable
+    ) {
+        String sellerId = getCurrentUserId();
+        Page<OrderDTO> orders = orderService.getOrdersBySeller(sellerId, pageable, search, status);
+        return ResponseEntity.ok(orders);
     }
 
     /**
@@ -65,10 +113,13 @@ public class OrderController {
     @GetMapping("/buyer/{buyerId}")
     public ResponseEntity<Page<OrderDTO>> getOrdersByBuyer(
             @PathVariable String buyerId,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) OrderStatus status,
             Pageable pageable
     ) {
         log.info("GET /api/orders/buyer/{} - Fetching orders for buyer", buyerId);
-        Page<OrderDTO> orders = orderService.getOrdersByBuyer(buyerId, pageable);
+        enforceUserMatch(buyerId);
+        Page<OrderDTO> orders = orderService.getOrdersByBuyer(buyerId, pageable, search, status);
         return ResponseEntity.ok(orders);
     }
 
@@ -83,10 +134,13 @@ public class OrderController {
     @GetMapping("/seller/{sellerId}")
     public ResponseEntity<Page<OrderDTO>> getOrdersBySeller(
             @PathVariable String sellerId,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) OrderStatus status,
             Pageable pageable
     ) {
         log.info("GET /api/orders/seller/{} - Fetching orders for seller", sellerId);
-        Page<OrderDTO> orders = orderService.getOrdersBySeller(sellerId, pageable);
+        enforceUserMatch(sellerId);
+        Page<OrderDTO> orders = orderService.getOrdersBySeller(sellerId, pageable, search, status);
         return ResponseEntity.ok(orders);
     }
 
@@ -124,6 +178,7 @@ public class OrderController {
             Pageable pageable
     ) {
         log.info("GET /api/orders/buyer/{}/status/{} - Fetching orders", buyerId, status);
+        enforceUserMatch(buyerId);
         Page<OrderDTO> orders = orderService.getOrdersByBuyerAndStatus(buyerId, status, pageable);
         return ResponseEntity.ok(orders);
     }
@@ -137,11 +192,13 @@ public class OrderController {
      * @return updated order
      */
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<OrderDTO> updateOrderStatus(
-            @PathVariable String orderId,
+        public ResponseEntity<OrderDTO> updateOrderStatus(
+            @PathVariable @NonNull String orderId,
             @Valid @RequestBody UpdateOrderStatusRequest request
     ) {
         log.info("PATCH /api/orders/{}/status - Updating status to: {}", orderId, request.status());
+        OrderDTO existingOrder = orderService.getOrderById(orderId);
+        enforceSellerOwnership(existingOrder);
         OrderDTO updatedOrder = orderService.updateOrderStatus(orderId, request);
         return ResponseEntity.ok(updatedOrder);
     }
@@ -154,10 +211,33 @@ public class OrderController {
      * @return cancelled order
      */
     @PatchMapping("/{orderId}/cancel")
-    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable @NonNull String orderId) {
         log.info("PATCH /api/orders/{}/cancel - Cancelling order", orderId);
-        OrderDTO cancelledOrder = orderService.cancelOrder(orderId);
+        String buyerId = getCurrentUserId();
+        OrderDTO cancelledOrder = orderService.cancelOrder(orderId, buyerId);
         return ResponseEntity.ok(cancelledOrder);
+    }
+
+    /**
+     * Delete an order.
+     * DELETE /api/orders/{orderId}
+     */
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable @NonNull String orderId) {
+        String buyerId = getCurrentUserId();
+        orderService.deleteOrder(orderId, buyerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Redo an order.
+     * POST /api/orders/{orderId}/redo
+     */
+    @PostMapping("/{orderId}/redo")
+    public ResponseEntity<OrderDTO> redoOrder(@PathVariable @NonNull String orderId) {
+        String buyerId = getCurrentUserId();
+        OrderDTO order = orderService.redoOrder(orderId, buyerId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     /**
@@ -170,6 +250,7 @@ public class OrderController {
     @GetMapping("/buyer/{buyerId}/count")
     public ResponseEntity<Long> countOrdersByBuyer(@PathVariable String buyerId) {
         log.info("GET /api/orders/buyer/{}/count - Counting orders", buyerId);
+        enforceUserMatch(buyerId);
         long count = orderService.countOrdersByBuyer(buyerId);
         return ResponseEntity.ok(count);
     }
@@ -186,5 +267,56 @@ public class OrderController {
         log.info("GET /api/orders/status/{}/count - Counting orders", status);
         long count = orderService.countOrdersByStatus(status);
         return ResponseEntity.ok(count);
+    }
+
+    private String getCurrentUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            return "";
+        }
+        return auth.getName();
+    }
+
+    private boolean hasRole(String role) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getAuthorities() == null) {
+            return false;
+        }
+        return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+    }
+
+    private void enforceUserMatch(String userId) {
+        String currentUser = getCurrentUserId();
+        if (!userId.equals(currentUser)) {
+            throw new UnauthorizedException("Not allowed to access other users' orders");
+        }
+    }
+
+    private void enforceOrderAccess(OrderDTO order) {
+        String currentUser = getCurrentUserId();
+        if (currentUser.equals(order.buyerId())) {
+            return;
+        }
+
+        if (hasRole("SELLER")) {
+            boolean ownsItem = order.items().stream().anyMatch(item -> currentUser.equals(item.sellerId()));
+            if (ownsItem) {
+                return;
+            }
+        }
+
+        throw new UnauthorizedException("Not allowed to access this order");
+    }
+
+    private void enforceSellerOwnership(OrderDTO order) {
+        String currentUser = getCurrentUserId();
+        if (!hasRole("SELLER")) {
+            throw new UnauthorizedException("Not allowed to update order status");
+        }
+
+        boolean ownsItem = order.items().stream().anyMatch(item -> currentUser.equals(item.sellerId()));
+        if (!ownsItem) {
+            throw new UnauthorizedException("Not allowed to update this order");
+        }
     }
 }

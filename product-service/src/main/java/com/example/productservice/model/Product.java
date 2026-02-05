@@ -25,6 +25,7 @@ public class Product {
     private String name;
     private String description;
     private BigDecimal price;
+    private String category;
     /** Owner user id — references the owning User (user.id). */
     @Indexed
     private String ownerId;
@@ -86,6 +87,14 @@ public class Product {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getOwnerId() {

@@ -18,7 +18,30 @@
       placeholder="Search products..."
       (keyup.enter)="search()"
     />
-    <button (click)="search()">Search</button>
+    <input
+      type="text"
+      [(ngModel)]="category"
+      placeholder="Category"
+      (keyup.enter)="search()"
+    />
+    <input
+      type="number"
+      [(ngModel)]="minPrice"
+      placeholder="Min price"
+      (keyup.enter)="search()"
+    />
+    <input
+      type="number"
+      [(ngModel)]="maxPrice"
+      placeholder="Max price"
+      (keyup.enter)="search()"
+    />
+    <label class="checkbox">
+      <input type="checkbox" [(ngModel)]="inStockOnly" />
+      In stock only
+    </label>
+    <button (click)="search()">Apply</button>
+    <button class="btn-secondary" (click)="resetFilters()">Reset</button>
   </div>
 
   <div class="product-grid" *ngIf="products.length; else noProducts">
@@ -37,7 +60,20 @@
         <p class="description">
           {{ product.description || "No description" }}
         </p>
+        <p class="category" *ngIf="product.category">
+          Category: {{ product.category }}
+        </p>
         <p class="price">{{ product.price | currency }}</p>
+        <p class="stock" *ngIf="product.quantity !== undefined">
+          {{ product.quantity > 0 ? "In stock" : "Out of stock" }}
+        </p>
+        <button
+          class="btn btn-primary"
+          [disabled]="product.quantity !== undefined && product.quantity <= 0"
+          (click)="addToCart(product)"
+        >
+          Add to cart
+        </button>
       </div>
     </div>
   </div>

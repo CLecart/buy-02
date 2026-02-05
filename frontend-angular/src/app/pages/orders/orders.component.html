@@ -1,0 +1,105 @@
+<div class="container">
+  <div class="header">
+    <h1>Orders</h1>
+    <div class="modes" *ngIf="currentUser?.role === 'SELLER'">
+      <button
+        class="btn"
+        [class.active]="viewMode === 'buyer'"
+        (click)="switchMode('buyer')"
+      >
+        Buyer View
+      </button>
+      <button
+        class="btn"
+        [class.active]="viewMode === 'seller'"
+        (click)="switchMode('seller')"
+      >
+        Seller View
+      </button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Search by order ID or product"
+      (keyup.enter)="search()"
+    />
+    <select [(ngModel)]="statusFilter" (change)="search()">
+      <option value="">All statuses</option>
+      <option *ngFor="let status of orderStatuses" [value]="status">
+        {{ status }}
+      </option>
+    </select>
+    <button class="btn btn-primary" (click)="search()">Search</button>
+  </div>
+
+  <div *ngIf="!orders.length" class="empty-state">
+    <p>No orders found.</p>
+  </div>
+
+  <div class="orders-list" *ngIf="orders.length">
+    <div class="order-card" *ngFor="let order of orders">
+      <div class="order-header">
+        <div>
+          <h3>Order {{ order.id }}</h3>
+          <p>Status: {{ order.status }}</p>
+        </div>
+        <div class="order-meta">
+          <p>Total: {{ order.totalPrice | currency }}</p>
+          <p>Items: {{ order.items.length }}</p>
+        </div>
+      </div>
+
+      <ul class="items">
+        <li *ngFor="let item of order.items">
+          <span>{{ item.productName }}</span>
+          <span>Qty: {{ item.quantity }}</span>
+          <span>{{ item.subtotal | currency }}</span>
+        </li>
+      </ul>
+
+      <div class="order-actions">
+        <ng-container *ngIf="viewMode === 'buyer'">
+          <button
+            class="btn btn-secondary"
+            (click)="cancelOrder(order.id)"
+            [disabled]="!isCancellable(order)"
+          >
+            Cancel
+          </button>
+          <button class="btn" (click)="redoOrder(order.id)">Redo</button>
+          <button class="btn btn-danger" (click)="deleteOrder(order.id)">
+            Remove
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="viewMode === 'seller'">
+          <select [(ngModel)]="statusUpdates[order.id]" class="status-select">
+            <option value="" disabled>Select status</option>
+            <option *ngFor="let status of orderStatuses" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+          <button class="btn btn-primary" (click)="updateStatus(order.id)">
+            Update
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button [disabled]="currentPage === 0" (click)="loadPage(currentPage - 1)">
+      Previous
+    </button>
+    <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+    <button
+      [disabled]="currentPage >= totalPages - 1"
+      (click)="loadPage(currentPage + 1)"
+    >
+      Next
+    </button>
+  </div>
+</div>

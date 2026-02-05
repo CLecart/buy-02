@@ -12,7 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -68,14 +72,22 @@ public class SellerProfileService {
      * @param revenue revenue from sale
      */
     @Transactional
-    public void recordSale(String sellerId, Integer quantity, BigDecimal revenue) {
+    public void recordSale(String sellerId, Integer quantity, BigDecimal revenue, String productId) {
         log.debug("Recording sale for seller: {} - Qty: {}, Revenue: {}", sellerId, quantity, revenue);
 
         SellerProfile profile = profileRepository.findBySellerId(sellerId)
                 .orElseGet(() -> createNewProfile(sellerId));
 
-        profile.setTotalProductsSold(profile.getTotalProductsSold() + quantity);
-        profile.setTotalRevenue(profile.getTotalRevenue().add(revenue));
+        int totalSold = profile.getTotalProductsSold() != null ? profile.getTotalProductsSold() : 0;
+        BigDecimal totalRevenue = profile.getTotalRevenue() != null ? profile.getTotalRevenue() : BigDecimal.ZERO;
+        int soldQty = quantity != null ? quantity : 0;
+        BigDecimal saleRevenue = revenue != null ? revenue : BigDecimal.ZERO;
+
+        profile.setTotalProductsSold(totalSold + soldQty);
+        profile.setTotalRevenue(totalRevenue.add(saleRevenue));
+        profile.setLastOrderDate(LocalDateTime.now());
+
+        updateBestSellingProducts(profile, productId, quantity);
         profile.setUpdatedAt(LocalDateTime.now());
 
         profileRepository.save(profile);
@@ -187,11 +199,34 @@ public class SellerProfileService {
         newProfile.setTotalRevenue(BigDecimal.ZERO);
         newProfile.setAverageRating(0.0);
         newProfile.setTotalReviews(0);
-        newProfile.setBestSellingProductIds(Collections.emptyList());
+        newProfile.setBestSellingProductIds(new ArrayList<>());
+        newProfile.setSoldProductCounts(new HashMap<>());
         newProfile.setVerified(false);
         newProfile.setCreatedAt(LocalDateTime.now());
         newProfile.setUpdatedAt(LocalDateTime.now());
         return profileRepository.save(newProfile);
+    }
+
+    private void updateBestSellingProducts(SellerProfile profile, String productId, Integer quantity) {
+        if (productId == null || productId.isBlank() || quantity == null || quantity <= 0) {
+            return;
+        }
+
+        Map<String, Integer> counts = profile.getSoldProductCounts();
+        if (counts == null) {
+            counts = new HashMap<>();
+            profile.setSoldProductCounts(counts);
+        }
+
+        counts.merge(productId, quantity, (left, right) -> left + right);
+
+        List<String> topProducts = counts.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(5)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        profile.setBestSellingProductIds(new ArrayList<>(topProducts));
     }
 
     /**

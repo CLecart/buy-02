@@ -19,6 +19,9 @@ public record OrderDTO(
         @NotBlank(message = "Buyer ID is required")
         String buyerId,
 
+        @Email(message = "Buyer email must be valid")
+        String buyerEmail,
+
         @NotEmpty(message = "Order must contain at least one item")
         @Valid
         List<OrderItemDTO> items,

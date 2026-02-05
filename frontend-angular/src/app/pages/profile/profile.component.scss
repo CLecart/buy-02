@@ -1,0 +1,23 @@
+@use "../../../styles/variables" as *;
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: $spacing-md;
+}
+
+.card {
+  border: 1px solid var(--border-color);
+  border-radius: $border-radius-sm;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+  background: var(--surface-color);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.card ul {
+  padding-left: 1.2rem;
+}

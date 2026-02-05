@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SellerProfile entity representing extended profile information for sellers.
@@ -56,6 +57,8 @@ public class SellerProfile {
     private List<String> bestSellingProductIds;
 
     private List<String> topRatedProductIds;
+
+    private Map<String, Integer> soldProductCounts;
 
     private LocalDateTime createdAt;
 

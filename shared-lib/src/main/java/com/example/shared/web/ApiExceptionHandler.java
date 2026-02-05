@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.validation.ConstraintViolationException;
 import java.util.stream.Collectors;
+import com.example.shared.exception.UnauthorizedException;
 
 /**
  * Centralized exception handler that returns JSON error responses for common errors.
@@ -27,7 +28,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> onMessageNotReadable(HttpMessageNotReadableException ex) {
-        String msg = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+        String msg = java.util.Objects.toString(ex.getMostSpecificCause(), ex.getMessage());
         ErrorResponse body = new ErrorResponse("malformed_request", msg);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
@@ -45,9 +46,15 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse("invalid_argument", ex.getMessage()));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> onUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("forbidden", ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> onGeneric(Exception ex) {
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(new ErrorResponse("internal_error", "An unexpected error occurred"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("internal_error", "An unexpected error occurred"));
     }
 }

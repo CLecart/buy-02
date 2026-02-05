@@ -1,0 +1,68 @@
+<div class="container">
+  <div class="header">
+    <h1>Your Cart</h1>
+    <button
+      class="btn btn-secondary"
+      (click)="clearCart()"
+      [disabled]="!cart?.items?.length"
+    >
+      Clear Cart
+    </button>
+  </div>
+
+  <div *ngIf="!cart || !cart.items.length" class="empty-state">
+    <p>Your cart is empty.</p>
+  </div>
+
+  <div *ngIf="cart && cart.items.length" class="cart-grid">
+    <div class="cart-item" *ngFor="let item of cart.items">
+      <div class="item-info">
+        <h3>{{ item.productName }}</h3>
+        <p>Seller: {{ item.sellerId }}</p>
+      </div>
+      <div class="item-qty">
+        <label [attr.for]="'qty-' + item.productId">Qty</label>
+        <input
+          [attr.id]="'qty-' + item.productId"
+          type="number"
+          [value]="item.quantity"
+          min="1"
+          (change)="
+            updateQuantity(item.productId, $any($event.target).valueAsNumber)
+          "
+        />
+      </div>
+      <div class="item-price">{{ item.subtotal | currency }}</div>
+      <button class="btn btn-danger" (click)="removeItem(item.productId)">
+        Remove
+      </button>
+    </div>
+
+    <div class="summary">
+      <h2>Order Summary</h2>
+      <p>Total items: {{ cart.itemCount }}</p>
+      <p class="total">Total: {{ cart.totalPrice | currency }}</p>
+
+      <label for="shippingAddress">Shipping address</label>
+      <textarea
+        id="shippingAddress"
+        rows="3"
+        [(ngModel)]="shippingAddress"
+        placeholder="Street, city, postal code..."
+      ></textarea>
+
+      <div class="payment">
+        <span>Payment method:</span>
+        <strong>Pay on delivery</strong>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        (click)="checkout()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? "Processing..." : "Place Order" }}
+      </button>
+    </div>
+  </div>
+</div>

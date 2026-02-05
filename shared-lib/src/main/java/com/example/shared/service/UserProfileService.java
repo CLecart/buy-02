@@ -1,6 +1,7 @@
 package com.example.shared.service;
 
 import com.example.shared.dto.UserProfileDTO;
+import com.example.shared.model.OrderItem;
 import com.example.shared.model.UserProfile;
 import com.example.shared.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -45,8 +50,9 @@ public class UserProfileService {
                     newProfile.setTotalOrders(0);
                     newProfile.setTotalSpent(BigDecimal.ZERO);
                     newProfile.setAverageOrderValue(BigDecimal.ZERO);
-                    newProfile.setFavoriteProductIds(Collections.emptyList());
-                    newProfile.setMostPurchasedProductIds(Collections.emptyList());
+                    newProfile.setFavoriteProductIds(new ArrayList<>());
+                    newProfile.setMostPurchasedProductIds(new ArrayList<>());
+                    newProfile.setPurchasedProductCounts(new HashMap<>());
                     newProfile.setCreatedAt(LocalDateTime.now());
                     newProfile.setUpdatedAt(LocalDateTime.now());
 
@@ -77,14 +83,21 @@ public class UserProfileService {
      * @param orderTotal the order total amount
      */
     @Transactional
-    public void recordNewOrder(String userId, BigDecimal orderTotal) {
+    public void recordNewOrder(String userId, BigDecimal orderTotal, List<OrderItem> items) {
         log.debug("Recording new order for user: {} with total: {}", userId, orderTotal);
 
         UserProfile profile = profileRepository.findByUserId(userId)
                 .orElseGet(() -> createNewProfile(userId));
 
-        profile.setTotalOrders(profile.getTotalOrders() + 1);
-        profile.setTotalSpent(profile.getTotalSpent().add(orderTotal));
+        int totalOrders = profile.getTotalOrders() != null ? profile.getTotalOrders() : 0;
+        BigDecimal totalSpent = profile.getTotalSpent() != null ? profile.getTotalSpent() : BigDecimal.ZERO;
+        BigDecimal orderValue = orderTotal != null ? orderTotal : BigDecimal.ZERO;
+
+        profile.setTotalOrders(totalOrders + 1);
+        profile.setTotalSpent(totalSpent.add(orderValue));
+        profile.setLastOrderDate(LocalDateTime.now());
+
+        updateMostPurchasedProducts(profile, items);
 
         // Calculate new average
         BigDecimal newAverage = profile.getTotalSpent()
@@ -109,6 +122,10 @@ public class UserProfileService {
         UserProfile profile = profileRepository.findByUserId(userId)
                 .orElseGet(() -> createNewProfile(userId));
 
+        if (profile.getFavoriteProductIds() == null) {
+            profile.setFavoriteProductIds(new ArrayList<>());
+        }
+
         if (!profile.getFavoriteProductIds().contains(productId)) {
             profile.getFavoriteProductIds().add(productId);
             profile.setUpdatedAt(LocalDateTime.now());
@@ -129,6 +146,10 @@ public class UserProfileService {
 
         UserProfile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new NoSuchElementException("Profile not found for user: " + userId));
+
+        if (profile.getFavoriteProductIds() == null) {
+            profile.setFavoriteProductIds(new ArrayList<>());
+        }
 
         if (profile.getFavoriteProductIds().remove(productId)) {
             profile.setUpdatedAt(LocalDateTime.now());
@@ -182,8 +203,9 @@ public class UserProfileService {
         newProfile.setTotalOrders(0);
         newProfile.setTotalSpent(BigDecimal.ZERO);
         newProfile.setAverageOrderValue(BigDecimal.ZERO);
-        newProfile.setFavoriteProductIds(Collections.emptyList());
-        newProfile.setMostPurchasedProductIds(Collections.emptyList());
+        newProfile.setFavoriteProductIds(new ArrayList<>());
+        newProfile.setMostPurchasedProductIds(new ArrayList<>());
+        newProfile.setPurchasedProductCounts(new HashMap<>());
         newProfile.setCreatedAt(LocalDateTime.now());
         newProfile.setUpdatedAt(LocalDateTime.now());
         return profileRepository.save(newProfile);
@@ -204,5 +226,33 @@ public class UserProfileService {
                 profile.getCreatedAt(),
                 profile.getUpdatedAt()
         );
+    }
+
+    private void updateMostPurchasedProducts(UserProfile profile, List<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        Map<String, Integer> counts = profile.getPurchasedProductCounts();
+        if (counts == null) {
+            counts = new HashMap<>();
+            profile.setPurchasedProductCounts(counts);
+        }
+
+        for (OrderItem item : items) {
+            Integer quantity = item.getQuantity();
+            if (quantity == null || item.getProductId() == null) {
+                continue;
+            }
+            counts.merge(item.getProductId(), quantity, (left, right) -> left + right);
+        }
+
+        List<String> topProducts = counts.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(5)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        profile.setMostPurchasedProductIds(new ArrayList<>(topProducts));
     }
 }

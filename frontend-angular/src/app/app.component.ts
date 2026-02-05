@@ -21,6 +21,9 @@ import { ThemeToggleComponent } from "./components/theme-toggle/theme-toggle.com
       </div>
       <nav class="nav-links">
         <a routerLink="/">Products</a>
+        <a *ngIf="currentUser" routerLink="/cart">Cart</a>
+        <a *ngIf="currentUser" routerLink="/orders">Orders</a>
+        <a *ngIf="currentUser" routerLink="/profile">Profile</a>
         <a *ngIf="currentUser?.role === 'SELLER'" routerLink="/dashboard"
           >Dashboard</a
         >
