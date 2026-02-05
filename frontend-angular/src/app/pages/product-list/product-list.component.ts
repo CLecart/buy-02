@@ -5,6 +5,7 @@ import { RouterLink } from "@angular/router";
 import { ProductService } from "../../services/product.service";
 import { CartService } from "../../services/cart.service";
 import { AuthService } from "../../services/auth.service";
+import { ProfileService } from "../../services/profile.service";
 import { Product, Page } from "../../models/product.model";
 
 /**
@@ -28,31 +29,41 @@ export class ProductListComponent implements OnInit {
   currentPage = 0;
   totalPages = 0;
   pageSize = 12;
+  favoriteIds = new Set<string>();
 
   constructor(
     private readonly productService: ProductService,
     private readonly cartService: CartService,
-    public authService: AuthService
+    public authService: AuthService,
+    private readonly profileService: ProfileService,
   ) {}
 
   ngOnInit(): void {
     this.loadProducts();
+    this.authService.currentUser$.subscribe((user) => {
+      if (!user) {
+        this.favoriteIds.clear();
+        return;
+      }
+      this.profileService.getMyProfile().subscribe({
+        next: (profile) => {
+          this.favoriteIds = new Set(profile.favoriteProductIds ?? []);
+        },
+        error: (err: unknown) => console.error("Failed to load favorites", err),
+      });
+    });
   }
 
   loadProducts(): void {
     this.productService
-      .getProducts(
-        this.currentPage,
-        this.pageSize,
-        {
-          search: this.searchTerm || undefined,
-          category: this.category || undefined,
-          minPrice: this.minPrice,
-          maxPrice: this.maxPrice,
-          sellerId: this.sellerId || undefined,
-          inStock: this.inStockOnly ? true : undefined,
-        }
-      )
+      .getProducts(this.currentPage, this.pageSize, {
+        search: this.searchTerm || undefined,
+        category: this.category || undefined,
+        minPrice: this.minPrice,
+        maxPrice: this.maxPrice,
+        sellerId: this.sellerId || undefined,
+        inStock: this.inStockOnly ? true : undefined,
+      })
       .subscribe({
         next: (page: Page<Product>) => {
           this.products = page.content;
@@ -109,5 +120,36 @@ export class ProductListComponent implements OnInit {
         next: () => alert("Added to cart."),
         error: (err: unknown) => console.error("Failed to add to cart", err),
       });
+  }
+
+  isFavorite(productId?: string): boolean {
+    if (!productId) {
+      return false;
+    }
+    return this.favoriteIds.has(productId);
+  }
+
+  toggleFavorite(product: Product): void {
+    if (!this.authService.isAuthenticated()) {
+      alert("Please sign in to manage your wishlist.");
+      return;
+    }
+
+    if (!product.id) {
+      return;
+    }
+
+    if (this.isFavorite(product.id)) {
+      this.profileService.removeFavorite(product.id).subscribe({
+        next: () => this.favoriteIds.delete(product.id as string),
+        error: (err: unknown) =>
+          console.error("Failed to remove favorite", err),
+      });
+    } else {
+      this.profileService.addFavorite(product.id).subscribe({
+        next: () => this.favoriteIds.add(product.id as string),
+        error: (err: unknown) => console.error("Failed to add favorite", err),
+      });
+    }
   }
 }

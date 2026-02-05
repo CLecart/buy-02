@@ -21,3 +21,10 @@
 .card ul {
   padding-left: 1.2rem;
 }
+
+.card li {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  justify-content: space-between;
+}

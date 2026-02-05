@@ -16,6 +16,21 @@ export class ProfileService {
     return this.http.get<UserProfile>(`${this.USER_API}/${userId}`);
   }
 
+  getMyProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.USER_API}/me`);
+  }
+
+  addFavorite(productId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.USER_API}/me/favorites/${productId}`,
+      {},
+    );
+  }
+
+  removeFavorite(productId: string): Observable<void> {
+    return this.http.delete<void>(`${this.USER_API}/me/favorites/${productId}`);
+  }
+
   getSellerProfile(sellerId: string): Observable<SellerProfile> {
     return this.http.get<SellerProfile>(`${this.SELLER_API}/${sellerId}`);
   }

@@ -73,6 +73,14 @@
   align-items: center;
 }
 
+.order-actions input {
+  padding: 0.45rem 0.6rem;
+  border-radius: $border-radius-sm;
+  border: 1px solid var(--border-color);
+  background: var(--surface-color);
+  color: var(--text-color);
+}
+
 .status-select {
   padding: 0.5rem;
   border-radius: $border-radius-sm;

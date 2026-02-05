@@ -115,6 +115,7 @@ Purchase orders placed by customers.
     BANK_TRANSFER,
     WALLET
   ],
+  paymentReference: string,
   shippingAddress: string,
   trackingNumber: string,
   estimatedDeliveryDate: datetime,
@@ -404,7 +405,7 @@ db.seller_profiles.createIndex({ sellerId: 1 }, { unique: true });
 ## Future Enhancements
 
 - [ ] Add `reviews` collection for product ratings
-- [ ] Add `wishlist` collection for saved products
+- [x] Wishlist stored in `user_profiles.favoriteProductIds`
 - [ ] Add `payments` collection for detailed payment tracking
 - [ ] Implement sharding for scaling (collection > 500MB)
 - [ ] Add audit logs for compliance

@@ -32,6 +32,7 @@ export interface Order {
   totalPrice: number;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
+  paymentReference?: string;
   shippingAddress: string;
   trackingNumber?: string;
   createdAt?: string;
@@ -51,6 +52,7 @@ export interface CreateOrderRequest {
   buyerEmail: string;
   items: CreateOrderRequestItem[];
   paymentMethod: PaymentMethod;
+  paymentReference?: string;
   shippingAddress: string;
 }
 

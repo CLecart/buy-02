@@ -36,6 +36,8 @@ public record OrderDTO(
         @NotNull(message = "Payment method is required")
         PaymentMethod paymentMethod,
 
+        String paymentReference,
+
         @NotBlank(message = "Shipping address is required")
         @Size(max = 500, message = "Shipping address must not exceed 500 characters")
         String shippingAddress,

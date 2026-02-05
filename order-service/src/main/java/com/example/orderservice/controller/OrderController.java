@@ -50,6 +50,7 @@ public class OrderController {
                 request.buyerEmail(),
                 request.items(),
                 request.paymentMethod(),
+            request.paymentReference(),
                 request.shippingAddress()
         );
 

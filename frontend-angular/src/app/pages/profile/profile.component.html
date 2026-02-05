@@ -10,8 +10,23 @@
     <div *ngIf="userProfile.mostPurchasedProductIds?.length">
       <h3>Most Purchased Products</h3>
       <ul>
-        <li *ngFor="let productId of userProfile.mostPurchasedProductIds">
-          {{ productId }}
+        <li *ngFor="let product of mostPurchasedProducts">
+          {{ product.name }}
+        </li>
+      </ul>
+    </div>
+
+    <div *ngIf="userProfile.favoriteProductIds?.length">
+      <h3>Wishlist</h3>
+      <ul>
+        <li *ngFor="let product of favoriteProducts">
+          <span>{{ product.name }}</span>
+          <button
+            class="btn btn-secondary"
+            (click)="removeFavorite(product.id)"
+          >
+            Remove
+          </button>
         </li>
       </ul>
     </div>
@@ -27,8 +42,8 @@
     <div *ngIf="sellerProfile.bestSellingProductIds?.length">
       <h3>Best Selling Products</h3>
       <ul>
-        <li *ngFor="let productId of sellerProfile.bestSellingProductIds">
-          {{ productId }}
+        <li *ngFor="let product of bestSellingProducts">
+          {{ product.name }}
         </li>
       </ul>
     </div>

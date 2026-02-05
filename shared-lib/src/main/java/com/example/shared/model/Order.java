@@ -44,6 +44,8 @@ public class Order {
 
     private PaymentMethod paymentMethod;
 
+    private String paymentReference;
+
     private String shippingAddress;
 
     private String trackingNumber;
