@@ -6,7 +6,7 @@ Cette page décrit les étapes minimales pour reproduire l'environnement utilis�
 
 Prérequis : Docker et Docker Compose v2+.
 
-> **Note** : Le container MongoDB expose le port `27018` sur l'hôte (pour éviter les conflits avec une instance MongoDB locale sur 27017). Les services Docker communiquent en interne via `mongo:27017`.
+> **Note** : Le container MongoDB expose le port `27019` sur l'hôte (pour éviter les conflits avec une instance MongoDB locale sur 27017). Les services Docker communiquent en interne via `mongo:27017`.
 
 ```bash
 # Créer un .env local (NE PAS committer)
@@ -22,6 +22,7 @@ docker compose -f docker-compose.dev.yml up -d --build
 # API user-service sur http://localhost:8081
 # API product-service sur http://localhost:8082
 # API media-service sur http://localhost:8083
+# API order-service sur http://localhost:8084
 ```
 
 Pour arrêter :
@@ -71,7 +72,7 @@ mkdir -p out/smoke out/logs
 # signup
 curl -s -X POST http://localhost:8081/api/auth/signup \
   -H 'Content-Type: application/json' \
-  -d "{\"name\":\"Audit User\",\"email\":\"$email\",\"password\":\"P@ssw0rd!\",\"role\":\"SELLER\"}" \
+  -d "{\"name\":\"Audit User\",\"email\":\"$email\",\"password\":\"Passw0rd1\",\"role\":\"SELLER\"}" \
   -o out/smoke/signup_resp.json
 
 # extract token

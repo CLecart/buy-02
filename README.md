@@ -67,7 +67,7 @@ docker compose -f docker-compose.dev.yml up -d mongo kafka zookeeper
 
 # Set environment
 export APP_JWT_SECRET=$(openssl rand -base64 32)
-export MONGO_URI='mongodb://root:example@localhost:27018/buy02?authSource=admin'
+export MONGO_URI='mongodb://root:example@localhost:27019/buy02?authSource=admin'
 
 # Run services (separate terminals)
 mvn -pl user-service spring-boot:run
@@ -146,18 +146,18 @@ mvn clean verify
 
 ### Order Service (8084)
 
-| Method | Endpoint                       | Description           | Auth        |
-| ------ | ------------------------------ | --------------------- | ----------- |
-| GET    | `/api/orders/me`               | List my orders        | JWT         |
-| GET    | `/api/orders/seller/me`        | List seller orders    | JWT + SELLER|
-| POST   | `/api/orders`                  | Create order          | JWT         |
-| PATCH  | `/api/orders/{id}/cancel`      | Cancel order          | JWT         |
-| POST   | `/api/orders/{id}/redo`        | Redo order            | JWT         |
-| DELETE | `/api/orders/{id}`             | Remove order          | JWT         |
-| GET    | `/api/carts/me`                | Get my cart           | JWT         |
-| POST   | `/api/carts/me/items`          | Add to cart           | JWT         |
-| PATCH  | `/api/carts/me/items/{id}`     | Update cart quantity  | JWT         |
-| DELETE | `/api/carts/me/items/{id}`     | Remove cart item      | JWT         |
+| Method | Endpoint                   | Description          | Auth         |
+| ------ | -------------------------- | -------------------- | ------------ |
+| GET    | `/api/orders/me`           | List my orders       | JWT          |
+| GET    | `/api/orders/seller/me`    | List seller orders   | JWT + SELLER |
+| POST   | `/api/orders`              | Create order         | JWT          |
+| PATCH  | `/api/orders/{id}/cancel`  | Cancel order         | JWT          |
+| POST   | `/api/orders/{id}/redo`    | Redo order           | JWT          |
+| DELETE | `/api/orders/{id}`         | Remove order         | JWT          |
+| GET    | `/api/carts/me`            | Get my cart          | JWT          |
+| POST   | `/api/carts/me/items`      | Add to cart          | JWT          |
+| PATCH  | `/api/carts/me/items/{id}` | Update cart quantity | JWT          |
+| DELETE | `/api/carts/me/items/{id}` | Remove cart item     | JWT          |
 
 ## Architecture
 

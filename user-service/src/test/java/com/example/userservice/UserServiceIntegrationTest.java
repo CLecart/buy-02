@@ -1,4 +1,4 @@
-package com.example.userservice.integration;
+package com.example.userservice;
 
 import com.example.userservice.dto.SignupRequest;
 import org.junit.jupiter.api.Test;
@@ -9,8 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Objects;
 import com.example.shared.security.JwtService;
-import com.example.userservice.repository.UserRepository;
-import com.example.userservice.model.User;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -26,9 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @Tag("integration")
 class UserServiceIntegrationTest {
-
-    
-
     @LocalServerPort
     int port;
 
@@ -38,9 +33,6 @@ class UserServiceIntegrationTest {
     @Autowired
     JwtService jwtService;
 
-    @Autowired
-    UserRepository userRepository;
-
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:6.0");
 
@@ -49,7 +41,6 @@ class UserServiceIntegrationTest {
     @DynamicPropertySource
     static void registerMongoProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
-        
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
         testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
@@ -66,28 +57,34 @@ class UserServiceIntegrationTest {
         req.setPassword("password123");
         req.setRole(com.example.userservice.model.Role.SELLER);
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(java.util.Objects.requireNonNull(MediaType.APPLICATION_JSON));
-
-    
-    HttpEntity<SignupRequest> entity = new HttpEntity<>(req, headers);
-    ResponseEntity<String> respStr = rest.postForEntity(base + "/api/auth/signup", entity, String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(Objects.requireNonNull(MediaType.APPLICATION_JSON));
+        HttpEntity<SignupRequest> entity = new HttpEntity<>(req, headers);
+        ResponseEntity<String> respStr = rest.postForEntity(base + "/api/auth/signup", entity, String.class);
         assertThat(respStr.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         String body = Objects.requireNonNull(respStr.getBody(), "signup response body must not be null");
 
-    
-    ObjectMapper om = new ObjectMapper();
-    JsonNode root = om.readTree(body);
-    String signupToken = Objects.requireNonNull(root.path("token").asText(null), "signup token must not be null");
-    assertThat(body).as("signup raw body").contains("token");
-    assertThat(signupToken).as("signup response body: %s", body).isNotBlank();
+        ObjectMapper om = new ObjectMapper();
+        JsonNode root = om.readTree(body);
+        String signupToken = Objects.requireNonNull(root.path("token").asText(null), "signup token must not be null");
+        assertThat(body).as("signup raw body").contains("token");
+        assertThat(signupToken).as("signup response body: %s", body).isNotBlank();
 
-    
-    User saved = userRepository.findByEmail("alice@example.com").orElse(null);
-    assertThat(saved).as("user persisted").isNotNull();
-    assertThat(saved.getId()).as("saved user id").isNotBlank();
+        HttpHeaders meHeaders = new HttpHeaders();
+        meHeaders.setBearerAuth(signupToken);
+        ResponseEntity<String> meResp = rest.exchange(
+            base + "/api/users/me",
+            HttpMethod.GET,
+            new HttpEntity<>(meHeaders),
+            String.class
+        );
+        assertThat(meResp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String meBody = Objects.requireNonNull(meResp.getBody(), "me response body must not be null");
+        JsonNode meNode = om.readTree(meBody);
+        assertThat(meNode.path("id").asText()).as("me id").isNotBlank();
+        assertThat(meNode.path("email").asText()).as("me email").isEqualTo("alice@example.com");
 
-    var signinClaims = jwtService.parseToken(signupToken);
+        var signinClaims = jwtService.parseToken(signupToken);
         assertThat(signinClaims.getSubject()).isNotBlank();
         assertThat(signinClaims.get("roles", String.class)).isEqualTo("SELLER");
     }
