@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.hamcrest.Matchers.containsString;
 
-public class ProductValidationErrorMvcTest {
+class ProductValidationErrorMvcTest {
 
     @Test
     void mvc_post_invalid_product_returns_validation_error_json() throws Exception {
