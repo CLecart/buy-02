@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,7 +65,7 @@ public class OrderController {
      * @return order DTO
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDTO> getOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderDTO> getOrder(@PathVariable @NonNull String orderId) {
         log.info("GET /api/orders/{} - Fetching order", orderId);
         OrderDTO order = orderService.getOrderById(orderId);
         enforceOrderAccess(order);
@@ -191,8 +192,8 @@ public class OrderController {
      * @return updated order
      */
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<OrderDTO> updateOrderStatus(
-            @PathVariable String orderId,
+        public ResponseEntity<OrderDTO> updateOrderStatus(
+            @PathVariable @NonNull String orderId,
             @Valid @RequestBody UpdateOrderStatusRequest request
     ) {
         log.info("PATCH /api/orders/{}/status - Updating status to: {}", orderId, request.status());
@@ -210,7 +211,7 @@ public class OrderController {
      * @return cancelled order
      */
     @PatchMapping("/{orderId}/cancel")
-    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable @NonNull String orderId) {
         log.info("PATCH /api/orders/{}/cancel - Cancelling order", orderId);
         String buyerId = getCurrentUserId();
         OrderDTO cancelledOrder = orderService.cancelOrder(orderId, buyerId);
@@ -222,7 +223,7 @@ public class OrderController {
      * DELETE /api/orders/{orderId}
      */
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable String orderId) {
+    public ResponseEntity<Void> deleteOrder(@PathVariable @NonNull String orderId) {
         String buyerId = getCurrentUserId();
         orderService.deleteOrder(orderId, buyerId);
         return ResponseEntity.noContent().build();
@@ -233,7 +234,7 @@ public class OrderController {
      * POST /api/orders/{orderId}/redo
      */
     @PostMapping("/{orderId}/redo")
-    public ResponseEntity<OrderDTO> redoOrder(@PathVariable String orderId) {
+    public ResponseEntity<OrderDTO> redoOrder(@PathVariable @NonNull String orderId) {
         String buyerId = getCurrentUserId();
         OrderDTO order = orderService.redoOrder(orderId, buyerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);

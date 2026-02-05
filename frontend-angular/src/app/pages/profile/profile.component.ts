@@ -18,8 +18,8 @@ export class ProfileComponent implements OnInit {
   sellerProfile: SellerProfile | null = null;
 
   constructor(
-    private profileService: ProfileService,
-    private authService: AuthService
+    private readonly profileService: ProfileService,
+    private readonly authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -34,7 +34,8 @@ export class ProfileComponent implements OnInit {
   private loadProfiles(user: User): void {
     this.profileService.getUserProfile(user.id).subscribe({
       next: (profile) => (this.userProfile = profile),
-      error: (err: unknown) => console.error("Failed to load user profile", err),
+      error: (err: unknown) =>
+        console.error("Failed to load user profile", err),
     });
 
     if (user.role === "SELLER") {

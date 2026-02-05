@@ -47,6 +47,7 @@ public class MediaController {
     /** Maximum allowed page size for listing endpoints (protects the service from large responses). */
     private static final int MAX_PAGE_SIZE = 200;
     private static final long MAX_UPLOAD_BYTES = 2L * 1024L * 1024L;
+    private static final String PAGEABLE_REQUIRED = "pageable";
 
     public MediaController(StorageService storageService, com.example.mediaservice.client.ProductClient productClient,
                            com.example.mediaservice.repository.MediaRepository mediaRepository) {
@@ -134,20 +135,19 @@ public class MediaController {
             log.debug("Invalid pagination parameters: page={}, size={}", page, size);
             return ResponseEntity.badRequest().build();
         }
-        org.springframework.data.domain.Sort.Order order = parseSortOrder(sort);
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
-            page,
-            size,
-            org.springframework.data.domain.Sort.by(order)
-        );
-
         org.springframework.data.domain.Page<com.example.mediaservice.model.MediaFile> pageRes;
         if (productId != null && !productId.isBlank()) {
-            pageRes = mediaRepository.findByProductId(productId, pageable);
+            pageRes = mediaRepository.findByProductId(
+                productId,
+                Objects.requireNonNull(buildPageable(page, size, sort), PAGEABLE_REQUIRED)
+            );
         } else if (ownerId != null && !ownerId.isBlank()) {
-            pageRes = mediaRepository.findByOwnerId(ownerId, pageable);
+            pageRes = mediaRepository.findByOwnerId(
+                ownerId,
+                Objects.requireNonNull(buildPageable(page, size, sort), PAGEABLE_REQUIRED)
+            );
         } else {
-            pageRes = mediaRepository.findAll(pageable);
+            pageRes = mediaRepository.findAll(Objects.requireNonNull(buildPageable(page, size, sort), PAGEABLE_REQUIRED));
         }
 
         java.util.List<com.example.mediaservice.dto.MediaMetadataDto> dtos = pageRes.getContent().stream()
@@ -225,6 +225,11 @@ public class MediaController {
             return principal;
         }
         return null;
+    }
+
+    private org.springframework.data.domain.Pageable buildPageable(int page, int size, String sort) {
+        org.springframework.data.domain.Sort.Order order = parseSortOrder(sort);
+        return org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(order));
     }
 
     private ResponseEntity<MediaUploadResponse> validateProductOwnership(String productId, String ownerId) {
