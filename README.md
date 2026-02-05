@@ -104,14 +104,17 @@ For production, use **Let's Encrypt** or a proper CA certificate.
 ## Testing
 
 ```bash
-# Run all tests
+# Run unit tests (fast, no Docker required)
 mvn clean test
 
-# Run specific service tests
+# Run a specific service unit tests
 mvn -pl product-service test
 
-# Run with coverage
-mvn clean verify
+# Run integration tests (requires Docker/Testcontainers)
+mvn verify -Pintegration
+
+# Run integration tests for one module
+mvn -pl media-service -am verify -Pintegration
 ```
 
 ## API Endpoints
@@ -161,46 +164,43 @@ mvn clean verify
 
 ## Architecture
 
-```
-                                    ┌──────────────────┐
-                                    │  Angular Frontend │
-                                    │      :4200       │
-                                    └────────┬─────────┘
-                                             │ HTTP/HTTPS
-                    ┌────────────────────────┼────────────────────────┐
-                    │                        │                        │
-                    ▼                        ▼                        ▼
-          ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-          │  user-service   │     │ product-service │     │  media-service  │
-          │     :8081       │     │     :8082       │     │     :8083       │
-          │                 │     │                 │     │                 │
-          │ • Auth (JWT)    │     │ • Product CRUD  │     │ • Image Upload  │
-          │ • User CRUD     │     │ • Ownership     │     │ • 2MB Limit     │
-          │ • Avatar Upload │     │                 │     │ • Type Valid.   │
-          └────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-                   │                       │                       │
-                   │    ┌──────────────────┴───────────────────┐   │
-                   │    │                                      │   │
-                   ▼    ▼                                      ▼   ▼
-          ┌─────────────────┐                         ┌─────────────────┐
-          │    MongoDB      │                         │     Kafka       │
-          │     :27017      │                         │     :9092       │
-          │                 │                         │                 │
-          │ • userdb        │                         │ • user-events   │
-          │ • productdb     │                         │ • product-events│
-          │ • mediadb       │                         │                 │
-          └─────────────────┘                         └─────────────────┘
+```mermaid
+flowchart LR
+  FE[Angular Frontend<br/>:4200]
+
+  US[user-service<br/>:8081<br/>Auth (JWT)<br/>User CRUD<br/>Avatar Upload]
+  PS[product-service<br/>:8082<br/>Product CRUD<br/>Ownership]
+  MS[media-service<br/>:8083<br/>Image Upload<br/>2MB Limit<br/>Type Valid.]
+  OS[order-service<br/>:8084<br/>Orders & Cart]
+
+  DB[MongoDB<br/>:27017<br/>userdb<br/>productdb<br/>mediadb]
+  K[Kafka<br/>:9092<br/>user-events<br/>product-events]
+
+  FE -->|HTTP/HTTPS| US
+  FE -->|HTTP/HTTPS| PS
+  FE -->|HTTP/HTTPS| MS
+  FE -->|HTTP/HTTPS| OS
+
+  US --> DB
+  PS --> DB
+  MS --> DB
+  OS --> DB
+
+  US --> K
+  PS --> K
 ```
 
 ### Event-Driven Communication (Kafka)
 
-```
-┌─────────────┐  UserDeletedEvent   ┌─────────────────┐  ProductDeletedEvent  ┌─────────────┐
-│user-service │ ─────────────────▶  │ product-service │ ─────────────────────▶│media-service│
-└─────────────┘                     └─────────────────┘                       └─────────────┘
-       │                                                                             ▲
-       │                          UserDeletedEvent                                   │
-       └─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+  US[user-service]
+  PS[product-service]
+  MS[media-service]
+
+  US -- UserDeletedEvent --> PS
+  US -- UserDeletedEvent --> MS
+  PS -- ProductDeletedEvent --> MS
 ```
 
 **Cascade Deletion Flow:**
@@ -230,7 +230,7 @@ mvn clean verify
 | Variable                  | Description                    | Default         |
 | ------------------------- | ------------------------------ | --------------- |
 | `APP_JWT_SECRET`          | JWT signing key (min 32 chars) | Required        |
-| `MONGO_URI`               | MongoDB connection string      | localhost:27018 |
+| `MONGO_URI`               | MongoDB connection string      | localhost:27019 |
 | `KAFKA_BOOTSTRAP_SERVERS` | Kafka broker address           | localhost:9092  |
 | `STORAGE_PATH`            | Media storage directory        | ./data/storage  |
 | `SSL_ENABLED`             | Enable HTTPS                   | false           |
