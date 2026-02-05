@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class MediaUploadOwnershipIntegrationTest {
+class MediaUploadOwnershipIntegrationTest {
 
     @Autowired
     MockMvc mvc;
