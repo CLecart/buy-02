@@ -16,7 +16,7 @@
         <pmd.skip>true</pmd.skip>
         <checkstyle.skip>false</checkstyle.skip>
         <!-- Plugin version pins (can be adjusted if newer compatible releases are available) -->
-        <spotbugs.plugin.version>4.7.3.2</spotbugs.plugin.version>
+        <spotbugs.plugin.version>4.8.3.0</spotbugs.plugin.version>
         <maven-pmd-plugin.version>3.22.0</maven-pmd-plugin.version>
         <maven-checkstyle-plugin.version>3.2.2</maven-checkstyle-plugin.version>
         <sonar.maven.plugin.version>3.10.0.2594</sonar.maven.plugin.version>
