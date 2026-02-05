@@ -24,6 +24,8 @@ export class OrdersComponent implements OnInit {
   totalPages = 0;
   pageSize = 8;
   statusUpdates: Record<string, OrderStatus> = {};
+  trackingUpdates: Record<string, string> = {};
+  statusReasons: Record<string, string> = {};
 
   readonly orderStatuses: OrderStatus[] = [
     "PENDING",
@@ -124,6 +126,27 @@ export class OrdersComponent implements OnInit {
       next: () => this.loadOrders(),
       error: (err: unknown) => console.error("Failed to update status", err),
     });
+  }
+
+  updateStatusWithDetails(orderId: string): void {
+    const status = this.statusUpdates[orderId];
+    if (!status) {
+      return;
+    }
+
+    const trackingNumber = this.trackingUpdates[orderId];
+    const reason = this.statusReasons[orderId];
+
+    this.orderService
+      .updateOrderStatus(orderId, {
+        status,
+        trackingNumber: trackingNumber?.trim() || undefined,
+        reason: reason?.trim() || undefined,
+      })
+      .subscribe({
+        next: () => this.loadOrders(),
+        error: (err: unknown) => console.error("Failed to update status", err),
+      });
   }
 
   isCancellable(order: Order): boolean {

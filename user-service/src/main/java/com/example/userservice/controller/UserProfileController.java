@@ -34,6 +34,19 @@ public class UserProfileController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserProfileDTO> getProfile(@PathVariable String userId) {
         log.info("GET /api/profiles/users/{} - Fetching profile", userId);
+        enforceUserMatch(userId);
+        UserProfileDTO profile = profileService.getOrCreateProfile(userId);
+        return ResponseEntity.ok(profile);
+    }
+
+    /**
+     * Get current user's profile.
+     * GET /api/profiles/users/me
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileDTO> getMyProfile() {
+        String userId = getCurrentUserId();
+        log.info("GET /api/profiles/users/me - Fetching profile for {}", userId);
         UserProfileDTO profile = profileService.getOrCreateProfile(userId);
         return ResponseEntity.ok(profile);
     }
@@ -52,6 +65,19 @@ public class UserProfileController {
             @PathVariable String productId
     ) {
         log.info("POST /api/profiles/users/{}/favorites/{} - Adding favorite", userId, productId);
+        enforceUserMatch(userId);
+        profileService.addFavoriteProduct(userId, productId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Add product to current user's favorites.
+     * POST /api/profiles/users/me/favorites/{productId}
+     */
+    @PostMapping("/me/favorites/{productId}")
+    public ResponseEntity<Void> addFavoriteForMe(@PathVariable String productId) {
+        String userId = getCurrentUserId();
+        log.info("POST /api/profiles/users/me/favorites/{} - Adding favorite", productId);
         profileService.addFavoriteProduct(userId, productId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -70,6 +96,19 @@ public class UserProfileController {
             @PathVariable String productId
     ) {
         log.info("DELETE /api/profiles/users/{}/favorites/{} - Removing favorite", userId, productId);
+        enforceUserMatch(userId);
+        profileService.removeFavoriteProduct(userId, productId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Remove product from current user's favorites.
+     * DELETE /api/profiles/users/me/favorites/{productId}
+     */
+    @DeleteMapping("/me/favorites/{productId}")
+    public ResponseEntity<Void> removeFavoriteForMe(@PathVariable String productId) {
+        String userId = getCurrentUserId();
+        log.info("DELETE /api/profiles/users/me/favorites/{} - Removing favorite", productId);
         profileService.removeFavoriteProduct(userId, productId);
         return ResponseEntity.noContent().build();
     }
@@ -122,5 +161,29 @@ public class UserProfileController {
         log.info("GET /api/profiles/users/analytics/by-orders - Min orders: {}", minOrders);
         Page<UserProfileDTO> users = profileService.getUsersByMinOrders(minOrders, pageable);
         return ResponseEntity.ok(users);
+    }
+
+    private String getCurrentUserId() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+        if (auth == null) {
+            throw new com.example.shared.exception.UnauthorizedException("Authentication required");
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof String userId && !userId.isBlank()) {
+            return userId;
+        }
+        if (auth.getName() != null && !auth.getName().isBlank()) {
+            return auth.getName();
+        }
+        throw new com.example.shared.exception.UnauthorizedException("Authentication required");
+    }
+
+    private void enforceUserMatch(String userId) {
+        String currentUserId = getCurrentUserId();
+        if (!userId.equals(currentUserId)) {
+            throw new com.example.shared.exception.UnauthorizedException("Not allowed to access another user's profile");
+        }
     }
 }

@@ -52,8 +52,23 @@
       ></textarea>
 
       <div class="payment">
-        <span>Payment method:</span>
-        <strong>Pay on delivery</strong>
+        <label for="paymentMethod">Payment method</label>
+        <select id="paymentMethod" [(ngModel)]="paymentMethod">
+          <option value="PAY_ON_DELIVERY">Pay on delivery</option>
+          <option value="CREDIT_CARD">Credit card</option>
+          <option value="BANK_TRANSFER">Bank transfer</option>
+          <option value="WALLET">Wallet</option>
+        </select>
+
+        <div class="payment-ref" *ngIf="paymentMethod !== 'PAY_ON_DELIVERY'">
+          <label for="paymentReference">Payment reference</label>
+          <input
+            id="paymentReference"
+            type="text"
+            [(ngModel)]="paymentReference"
+            placeholder="Last 4 digits / transfer ref / wallet id"
+          />
+        </div>
       </div>
 
       <button

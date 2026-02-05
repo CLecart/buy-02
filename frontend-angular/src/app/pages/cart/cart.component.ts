@@ -19,12 +19,14 @@ export class CartComponent implements OnInit {
   cart: ShoppingCart | null = null;
   currentUser: User | null = null;
   shippingAddress = "";
+  paymentMethod: PaymentMethod = "PAY_ON_DELIVERY";
+  paymentReference = "";
   isSubmitting = false;
 
   constructor(
     private readonly cartService: CartService,
     private readonly orderService: OrderService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -81,6 +83,14 @@ export class CartComponent implements OnInit {
       return;
     }
 
+    if (
+      this.paymentMethod !== "PAY_ON_DELIVERY" &&
+      !this.paymentReference.trim()
+    ) {
+      alert("Payment reference is required for the selected method.");
+      return;
+    }
+
     const request: CreateOrderRequest = {
       buyerId: this.currentUser.id,
       buyerEmail: this.currentUser.email,
@@ -91,7 +101,8 @@ export class CartComponent implements OnInit {
         quantity: item.quantity,
         price: item.price,
       })),
-      paymentMethod: "PAY_ON_DELIVERY" as PaymentMethod,
+      paymentMethod: this.paymentMethod,
+      paymentReference: this.paymentReference.trim() || undefined,
       shippingAddress: this.shippingAddress.trim(),
     };
 
@@ -100,6 +111,8 @@ export class CartComponent implements OnInit {
       next: () => {
         this.isSubmitting = false;
         this.shippingAddress = "";
+        this.paymentMethod = "PAY_ON_DELIVERY";
+        this.paymentReference = "";
         this.clearCart();
         alert("Order placed successfully.");
       },

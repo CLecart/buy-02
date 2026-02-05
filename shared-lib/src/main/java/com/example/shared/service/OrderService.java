@@ -90,6 +90,7 @@ public class OrderService {
         order.setTotalPrice(totalPrice);
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentMethod(request.paymentMethod());
+        order.setPaymentReference(request.paymentReference());
         order.setShippingAddress(request.shippingAddress());
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
@@ -321,6 +322,7 @@ public class OrderService {
                         ))
                         .toList(),
                 original.getPaymentMethod(),
+                    original.getPaymentReference(),
                 original.getShippingAddress()
         );
 
@@ -409,6 +411,7 @@ public class OrderService {
                 order.getTotalPrice(),
                 order.getStatus(),
                 order.getPaymentMethod(),
+            order.getPaymentReference(),
                 order.getShippingAddress(),
                 order.getTrackingNumber(),
                 order.getCreatedAt(),

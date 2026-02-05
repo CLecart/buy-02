@@ -74,6 +74,11 @@
         >
           Add to cart
         </button>
+        <button class="btn btn-secondary" (click)="toggleFavorite(product)">
+          {{
+            isFavorite(product.id) ? "Remove from wishlist" : "Add to wishlist"
+          }}
+        </button>
       </div>
     </div>
   </div>

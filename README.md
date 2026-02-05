@@ -8,6 +8,8 @@ An end-to-end e-commerce platform built with **Spring Boot 3.x microservices** a
 - **Product Management**: Full CRUD operations (SELLER only), ownership enforcement, search/filtering
 - **Media Management**: Image uploads with 2MB limit, type validation (JPEG, PNG, GIF)
 - **Orders & Cart**: Shopping cart, order creation, cancellation, redo, and status tracking
+- **Wishlist (Bonus)**: Save favorite products and manage a personal wishlist
+- **Payments (Bonus)**: Pay on delivery plus alternative payment methods
 - **Profiles**: Buyer and seller analytics (top products, spending/revenue)
 - **Event-Driven Architecture**: Kafka for inter-service communication (cascade deletions)
 - **Security**: BCrypt password hashing, role-based access control, HTTPS support
@@ -121,12 +123,15 @@ mvn -pl media-service -am verify -Pintegration
 
 ### User Service (8081)
 
-| Method | Endpoint               | Description          | Auth         |
-| ------ | ---------------------- | -------------------- | ------------ |
-| POST   | `/api/auth/signup`     | Register user        | -            |
-| POST   | `/api/auth/signin`     | Login                | -            |
-| GET    | `/api/users/me`        | Current user profile | JWT          |
-| POST   | `/api/users/me/avatar` | Upload avatar        | JWT + SELLER |
+| Method | Endpoint                                       | Description          | Auth         |
+| ------ | ---------------------------------------------- | -------------------- | ------------ |
+| POST   | `/api/auth/signup`                             | Register user        | -            |
+| POST   | `/api/auth/signin`                             | Login                | -            |
+| GET    | `/api/users/me`                                | Current user profile | JWT          |
+| POST   | `/api/users/me/avatar`                         | Upload avatar        | JWT + SELLER |
+| GET    | `/api/profiles/users/me`                       | My buyer profile     | JWT          |
+| POST   | `/api/profiles/users/me/favorites/{productId}` | Add wishlist item    | JWT          |
+| DELETE | `/api/profiles/users/me/favorites/{productId}` | Remove wishlist item | JWT          |
 
 ### Product Service (8082)
 

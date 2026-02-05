@@ -77,8 +77,25 @@
 
 .payment {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: $spacing-xs;
   color: var(--text-muted);
+}
+
+.payment select,
+.payment input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: $border-radius-sm;
+  background: var(--surface-color);
+  color: var(--text-color);
+}
+
+.payment-ref {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
 }
 
 .empty-state {

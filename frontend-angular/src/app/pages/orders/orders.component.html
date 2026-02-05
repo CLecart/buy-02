@@ -45,6 +45,15 @@
         <div>
           <h3>Order {{ order.id }}</h3>
           <p>Status: {{ order.status }}</p>
+          <p *ngIf="order.paymentMethod">
+            Payment: {{ order.paymentMethod }}
+            <span *ngIf="order.paymentReference">
+              ({{ order.paymentReference }})
+            </span>
+          </p>
+          <p *ngIf="order.trackingNumber">
+            Tracking: {{ order.trackingNumber }}
+          </p>
         </div>
         <div class="order-meta">
           <p>Total: {{ order.totalPrice | currency }}</p>
@@ -82,7 +91,20 @@
               {{ status }}
             </option>
           </select>
-          <button class="btn btn-primary" (click)="updateStatus(order.id)">
+          <input
+            type="text"
+            placeholder="Tracking number (optional)"
+            [(ngModel)]="trackingUpdates[order.id]"
+          />
+          <input
+            type="text"
+            placeholder="Status note (optional)"
+            [(ngModel)]="statusReasons[order.id]"
+          />
+          <button
+            class="btn btn-primary"
+            (click)="updateStatusWithDetails(order.id)"
+          >
             Update
           </button>
         </ng-container>

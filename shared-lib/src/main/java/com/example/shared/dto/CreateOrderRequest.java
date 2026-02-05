@@ -26,6 +26,9 @@ public record CreateOrderRequest(
         @NotNull(message = "Payment method is required")
         PaymentMethod paymentMethod,
 
+        @Size(max = 120, message = "Payment reference must not exceed 120 characters")
+        String paymentReference,
+
         @NotBlank(message = "Shipping address is required")
         @Size(max = 500, message = "Shipping address must not exceed 500 characters")
         String shippingAddress
