@@ -21,14 +21,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class MediaMetadataPersistenceIntegrationTest {
+class MediaMetadataPersistenceIntegrationTest {
 
     static final MongoDBContainer mongo = new MongoDBContainer("mongo:6.0.12");
 
@@ -41,8 +40,8 @@ public class MediaMetadataPersistenceIntegrationTest {
         reg.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        String TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        reg.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        String testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        reg.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
     @Autowired
@@ -68,7 +67,11 @@ public class MediaMetadataPersistenceIntegrationTest {
         byte[] png = java.util.Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=");
         MockMultipartFile file = new MockMultipartFile("file", "persist.png", MediaType.IMAGE_PNG_VALUE, png);
 
-        mvc.perform(multipart("/api/media/upload").file(file).param("productId", productId).with(java.util.Objects.requireNonNull(csrf())).with(java.util.Objects.requireNonNull(user(ownerId))))
+        mvc.perform(multipart("/api/media/upload")
+            .file(file)
+            .param("productId", productId)
+            .param("ownerId", ownerId)
+            .with(java.util.Objects.requireNonNull(user(ownerId).roles("SELLER"))))
             .andExpect(status().isOk());
 
         List<MediaFile> list = mediaRepository.findByProductId(productId);

@@ -7,16 +7,16 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-public class ProductIndexesIntegrationTest {
+class ProductIndexesIntegrationTest {
 
-    static String TEST_JWT_SECRET;
+    static String testJwtSecret;
 
     @org.springframework.test.context.DynamicPropertySource
     static void setProps(org.springframework.test.context.DynamicPropertyRegistry reg) {
         byte[] secretBytes = new byte[32];
         new java.security.SecureRandom().nextBytes(secretBytes);
-        TEST_JWT_SECRET = java.util.HexFormat.of().formatHex(secretBytes);
-        reg.add("APP_JWT_SECRET", () -> TEST_JWT_SECRET);
+        testJwtSecret = java.util.HexFormat.of().formatHex(secretBytes);
+        reg.add("APP_JWT_SECRET", () -> testJwtSecret);
     }
 
     @Test
