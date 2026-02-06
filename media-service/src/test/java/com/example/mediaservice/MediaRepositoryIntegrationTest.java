@@ -59,7 +59,8 @@ class MediaRepositoryIntegrationTest {
 
     
     List<MediaFile> list = mediaRepository.findAll();
-    assertThat(list).isNotEmpty();
-    assertThat(list).anyMatch(m -> ownerId.equals(m.getOwnerId()) && m.getFilename() != null);
+    assertThat(list)
+      .isNotEmpty()
+      .anyMatch(m -> ownerId.equals(m.getOwnerId()) && m.getFilename() != null);
     }
 }

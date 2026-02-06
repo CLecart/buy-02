@@ -78,12 +78,14 @@ class MediaMetadataPersistenceIntegrationTest {
         assertThat(list).hasSize(1);
         MediaFile meta = list.get(0);
         assertThat(meta.getOwnerId()).isEqualTo(ownerId);
-        assertThat(meta.getProductId()).isEqualTo(productId);
-        assertThat(meta.getSize()).isEqualTo(png.length);
-        assertThat(meta.getChecksum()).isNotNull();
-        assertThat(meta.getMimeType()).startsWith("image/");
-        // tiny test PNG is 1x1
-        assertThat(meta.getWidth()).isEqualTo(1);
-        assertThat(meta.getHeight()).isEqualTo(1);
+        assertThat(meta)
+          .satisfies(m -> {
+            assertThat(m.getProductId()).isEqualTo(productId);
+            assertThat(m.getSize()).isEqualTo(png.length);
+            assertThat(m.getChecksum()).isNotNull();
+            assertThat(m.getMimeType()).startsWith("image/");
+            assertThat(m.getWidth()).isEqualTo(1);
+            assertThat(m.getHeight()).isEqualTo(1);
+          });
     }
 }
