@@ -44,12 +44,20 @@
       <div class="order-header">
         <div>
           <h3>Order {{ order.id }}</h3>
-          <p>Status: {{ order.status }}</p>
+          <p class="status-row">
+            Status:
+            <span class="status-badge" [class]="statusClass(order.status)">
+              {{ statusLabels[order.status] || order.status }}
+            </span>
+          </p>
           <p *ngIf="order.paymentMethod">
-            Payment: {{ order.paymentMethod }}
+            Payment: {{ paymentLabel(order.paymentMethod) }}
             <span *ngIf="order.paymentReference">
               ({{ order.paymentReference }})
             </span>
+          </p>
+          <p *ngIf="order.shippingAddress">
+            Shipping: {{ order.shippingAddress }}
           </p>
           <p *ngIf="order.trackingNumber">
             Tracking: {{ order.trackingNumber }}
@@ -58,6 +66,9 @@
         <div class="order-meta">
           <p>Total: {{ order.totalPrice | currency }}</p>
           <p>Items: {{ order.items.length }}</p>
+          <p *ngIf="order.createdAt">
+            Placed: {{ order.createdAt | date: "medium" }}
+          </p>
         </div>
       </div>
 
@@ -88,7 +99,7 @@
           <select [(ngModel)]="statusUpdates[order.id]" class="status-select">
             <option value="" disabled>Select status</option>
             <option *ngFor="let status of orderStatuses" [value]="status">
-              {{ status }}
+              {{ statusLabels[status] || status }}
             </option>
           </select>
           <input
@@ -104,6 +115,7 @@
           <button
             class="btn btn-primary"
             (click)="updateStatusWithDetails(order.id)"
+            [disabled]="!statusUpdates[order.id]"
           >
             Update
           </button>

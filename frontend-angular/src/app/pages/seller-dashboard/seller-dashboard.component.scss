@@ -98,6 +98,62 @@
   flex-wrap: wrap;
 }
 
+.seller-stats {
+  margin-top: $spacing-lg;
+}
+
+.stat-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: $border-radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-sm;
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-md;
+  }
+}
+
+.badge {
+  padding: $spacing-2xs $spacing-sm;
+  border-radius: $border-radius-full;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge.verified {
+  background: #eff9f3;
+  color: #1f1f1f;
+}
+
+.badge.unverified {
+  background: #fff0ea;
+  color: #1f1f1f;
+}
+
+.stat-row {
+  margin: $spacing-xs 0;
+  color: var(--text-color);
+}
+
+.stat-muted {
+  color: var(--text-muted);
+}
+
+.verify-btn {
+  margin-top: $spacing-sm;
+}
+
 .profile-info {
   color: var(--text-color);
 

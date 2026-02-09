@@ -37,6 +37,22 @@ export class OrdersComponent implements OnInit {
     "REFUNDED",
   ];
 
+  readonly statusLabels: Record<OrderStatus, string> = {
+    PENDING: "Pending",
+    CONFIRMED: "Confirmed",
+    SHIPPED: "Shipped",
+    DELIVERED: "Delivered",
+    CANCELLED: "Cancelled",
+    RETURNED: "Returned",
+    REFUNDED: "Refunded",
+  };
+
+  readonly paymentLabels: Record<string, string> = {
+    PAY_ON_DELIVERY: "Pay on delivery",
+    PAYPAL: "PayPal",
+    WALLET: "Wallet",
+  };
+
   constructor(
     private readonly orderService: OrderService,
     public authService: AuthService,
@@ -151,5 +167,16 @@ export class OrdersComponent implements OnInit {
 
   isCancellable(order: Order): boolean {
     return order.status !== "CANCELLED" && order.status !== "DELIVERED";
+  }
+
+  statusClass(status: OrderStatus): string {
+    return `status-${status.toLowerCase()}`;
+  }
+
+  paymentLabel(method?: string): string {
+    if (!method) {
+      return "";
+    }
+    return this.paymentLabels[method] || method;
   }
 }

@@ -34,4 +34,8 @@ export class ProfileService {
   getSellerProfile(sellerId: string): Observable<SellerProfile> {
     return this.http.get<SellerProfile>(`${this.SELLER_API}/${sellerId}`);
   }
+
+  verifySeller(sellerId: string): Observable<void> {
+    return this.http.post<void>(`${this.SELLER_API}/${sellerId}/verify`, {});
+  }
 }

@@ -7,28 +7,63 @@
     <p>Total spent: {{ userProfile.totalSpent | currency }}</p>
     <p>Average order value: {{ userProfile.averageOrderValue | currency }}</p>
 
-    <div *ngIf="userProfile.mostPurchasedProductIds?.length">
+    <div
+      class="product-block"
+      *ngIf="userProfile.mostPurchasedProductIds?.length"
+    >
       <h3>Most Purchased Products</h3>
-      <ul>
-        <li *ngFor="let product of mostPurchasedProducts">
-          {{ product.name }}
-        </li>
-      </ul>
+      <div class="product-grid">
+        <div class="product-card" *ngFor="let product of mostPurchasedProducts">
+          <div class="product-image">
+            <img
+              *ngIf="product.mediaIds?.length && mediaUrls[product.id || '']"
+              [src]="mediaUrls[product.id || '']"
+              [alt]="product.name"
+            />
+            <div
+              *ngIf="!product.mediaIds?.length || !mediaUrls[product.id || '']"
+              class="no-image"
+            >
+              No Image
+            </div>
+          </div>
+          <div class="product-info">
+            <h4>{{ product.name }}</h4>
+            <p class="price">{{ product.price | currency }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div *ngIf="userProfile.favoriteProductIds?.length">
+    <div class="product-block" *ngIf="userProfile.favoriteProductIds?.length">
       <h3>Wishlist</h3>
-      <ul>
-        <li *ngFor="let product of favoriteProducts">
-          <span>{{ product.name }}</span>
+      <div class="product-grid">
+        <div class="product-card" *ngFor="let product of favoriteProducts">
+          <div class="product-image">
+            <img
+              *ngIf="product.mediaIds?.length && mediaUrls[product.id || '']"
+              [src]="mediaUrls[product.id || '']"
+              [alt]="product.name"
+            />
+            <div
+              *ngIf="!product.mediaIds?.length || !mediaUrls[product.id || '']"
+              class="no-image"
+            >
+              No Image
+            </div>
+          </div>
+          <div class="product-info">
+            <h4>{{ product.name }}</h4>
+            <p class="price">{{ product.price | currency }}</p>
+          </div>
           <button
             class="btn btn-secondary"
             (click)="removeFavorite(product.id)"
           >
             Remove
           </button>
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -39,13 +74,32 @@
     <p>Total revenue: {{ sellerProfile.totalRevenue | currency }}</p>
     <p>Average rating: {{ sellerProfile.averageRating }}</p>
 
-    <div *ngIf="sellerProfile.bestSellingProductIds?.length">
+    <div
+      class="product-block"
+      *ngIf="sellerProfile.bestSellingProductIds?.length"
+    >
       <h3>Best Selling Products</h3>
-      <ul>
-        <li *ngFor="let product of bestSellingProducts">
-          {{ product.name }}
-        </li>
-      </ul>
+      <div class="product-grid">
+        <div class="product-card" *ngFor="let product of bestSellingProducts">
+          <div class="product-image">
+            <img
+              *ngIf="product.mediaIds?.length && mediaUrls[product.id || '']"
+              [src]="mediaUrls[product.id || '']"
+              [alt]="product.name"
+            />
+            <div
+              *ngIf="!product.mediaIds?.length || !mediaUrls[product.id || '']"
+              class="no-image"
+            >
+              No Image
+            </div>
+          </div>
+          <div class="product-info">
+            <h4>{{ product.name }}</h4>
+            <p class="price">{{ product.price | currency }}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </div>
