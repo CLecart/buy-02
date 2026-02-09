@@ -177,16 +177,13 @@
   </section>
 
   <!-- Media Manager Modal -->
-  <dialog
-    class="modal"
-    *ngIf="selectedProductForMedia"
-    open
-    (click)="onModalBackdropClick($event)"
-    (keydown.escape)="closeMediaManager()"
-    role="dialog"
-    aria-modal="true"
-    tabindex="0"
-  >
+  <dialog class="modal" *ngIf="selectedProductForMedia" open aria-modal="true">
+    <button
+      type="button"
+      class="modal-backdrop"
+      aria-label="Close"
+      (click)="closeMediaManager()"
+    ></button>
     <div class="modal-content">
       <div class="modal-header">
         <h3>Media for: {{ selectedProductForMedia.name }}</h3>

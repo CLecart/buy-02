@@ -214,10 +214,25 @@ table {
 
 .modal {
   @include modal-overlay;
+  position: fixed;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
 }
 
 .modal-content {
   @include modal-content;
+  position: relative;
+  z-index: 1;
 }
 
 .modal-header {
