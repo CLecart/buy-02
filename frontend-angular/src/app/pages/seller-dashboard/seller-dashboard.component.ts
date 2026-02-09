@@ -8,6 +8,8 @@ import { Media } from "../../models/media.model";
 import { AuthService } from "../../services/auth.service";
 import { Product, Page } from "../../models/product.model";
 import { User } from "../../models/user.model";
+import { ProfileService } from "../../services/profile.service";
+import { SellerProfile } from "../../models/profile.model";
 
 /**
  * Seller dashboard for managing products and media.
@@ -21,6 +23,7 @@ import { User } from "../../models/user.model";
 })
 export class SellerDashboardComponent implements OnInit {
   currentUser: User | null = null;
+  sellerProfile: SellerProfile | null = null;
   myProducts: Product[] = [];
   productForm: Product = {
     name: "",
@@ -40,17 +43,25 @@ export class SellerDashboardComponent implements OnInit {
     private readonly productService: ProductService,
     private readonly mediaService: MediaService,
     private readonly authService: AuthService,
+    private readonly profileService: ProfileService,
     private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user: User | null) => {
       this.currentUser = user;
-      if (user && user.role !== "SELLER") {
-        this.router.navigate(["/"]);
+      if (!user) {
+        this.myProducts = [];
+        this.sellerProfile = null;
+        return;
       }
+      if (user.role !== "SELLER") {
+        this.router.navigate(["/"]);
+        return;
+      }
+      this.loadMyProducts();
+      this.loadSellerProfile();
     });
-    this.loadMyProducts();
   }
 
   getInitials(): string {
@@ -58,6 +69,9 @@ export class SellerDashboardComponent implements OnInit {
   }
 
   loadMyProducts(): void {
+    if (!this.currentUser?.id) {
+      return;
+    }
     this.productService
       .getProducts(0, 100, { sellerId: this.currentUser?.id })
       .subscribe({
@@ -68,6 +82,30 @@ export class SellerDashboardComponent implements OnInit {
           );
         },
       });
+  }
+
+  loadSellerProfile(): void {
+    if (!this.currentUser?.id) {
+      return;
+    }
+    this.profileService.getSellerProfile(this.currentUser.id).subscribe({
+      next: (profile) => (this.sellerProfile = profile),
+      error: (err: unknown) =>
+        console.error("Failed to load seller profile", err),
+    });
+  }
+
+  requestVerification(): void {
+    if (!this.currentUser?.id || this.sellerProfile?.verified) {
+      return;
+    }
+    this.profileService.verifySeller(this.currentUser.id).subscribe({
+      next: () => this.loadSellerProfile(),
+      error: (err: { error?: { message?: string }; message?: string }) =>
+        alert(
+          "Failed to verify seller: " + (err.error?.message || err.message),
+        ),
+    });
   }
 
   saveProduct(): void {

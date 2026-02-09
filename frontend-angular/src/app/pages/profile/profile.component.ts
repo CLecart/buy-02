@@ -7,6 +7,7 @@ import { User } from "../../models/user.model";
 import { forkJoin } from "rxjs";
 import { Product } from "../../models/product.model";
 import { ProductService } from "../../services/product.service";
+import { MediaService } from "../../services/media.service";
 
 @Component({
   selector: "app-profile",
@@ -22,11 +23,13 @@ export class ProfileComponent implements OnInit {
   favoriteProducts: Product[] = [];
   mostPurchasedProducts: Product[] = [];
   bestSellingProducts: Product[] = [];
+  mediaUrls: Record<string, string> = {};
 
   constructor(
     private readonly profileService: ProfileService,
     private readonly authService: AuthService,
     private readonly productService: ProductService,
+    private readonly mediaService: MediaService,
   ) {}
 
   ngOnInit(): void {
@@ -40,6 +43,7 @@ export class ProfileComponent implements OnInit {
         this.favoriteProducts = [];
         this.mostPurchasedProducts = [];
         this.bestSellingProducts = [];
+        this.mediaUrls = {};
       }
     });
   }
@@ -116,10 +120,30 @@ export class ProfileComponent implements OnInit {
 
     forkJoin(productRequests).subscribe({
       next: (products) => {
-        handler(products.filter((p): p is Product => Boolean(p)));
+        const resolved = products.filter((p): p is Product => Boolean(p));
+        handler(resolved);
+        this.resolveMediaUrls(resolved);
       },
       error: (err: unknown) =>
         console.error("Failed to load product details", err),
     });
+  }
+
+  private resolveMediaUrls(products: Product[]): void {
+    for (const product of products) {
+      const productId = product.id;
+      const mediaId = product.mediaIds?.[0];
+      if (!productId || !mediaId || this.mediaUrls[productId]) {
+        continue;
+      }
+      this.mediaService.getMediaById(mediaId).subscribe({
+        next: (media) => {
+          const url =
+            media.url || `/api/media/files/${media.ownerId}/${media.filename}`;
+          this.mediaUrls[productId] = url;
+        },
+        error: (err: unknown) => console.error("Failed to load media", err),
+      });
+    }
   }
 }

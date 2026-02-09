@@ -6,6 +6,7 @@ import { ProductService } from "../../services/product.service";
 import { CartService } from "../../services/cart.service";
 import { AuthService } from "../../services/auth.service";
 import { ProfileService } from "../../services/profile.service";
+import { MediaService } from "../../services/media.service";
 import { Product, Page } from "../../models/product.model";
 
 /**
@@ -30,12 +31,14 @@ export class ProductListComponent implements OnInit {
   totalPages = 0;
   pageSize = 12;
   favoriteIds = new Set<string>();
+  mediaUrls: Record<string, string> = {};
 
   constructor(
     private readonly productService: ProductService,
     private readonly cartService: CartService,
     public authService: AuthService,
     private readonly profileService: ProfileService,
+    private readonly mediaService: MediaService,
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +71,7 @@ export class ProductListComponent implements OnInit {
         next: (page: Page<Product>) => {
           this.products = page.content;
           this.totalPages = page.totalPages;
+          this.resolveMediaUrls(page.content);
         },
         error: (err: unknown) => console.error("Failed to load products", err),
       });
@@ -96,6 +100,24 @@ export class ProductListComponent implements OnInit {
 
   onImageError(event: Event): void {
     (event.target as HTMLImageElement).style.display = "none";
+  }
+
+  private resolveMediaUrls(products: Product[]): void {
+    for (const product of products) {
+      const productId = product.id;
+      const mediaId = product.mediaIds?.[0];
+      if (!productId || !mediaId || this.mediaUrls[productId]) {
+        continue;
+      }
+      this.mediaService.getMediaById(mediaId).subscribe({
+        next: (media) => {
+          const url =
+            media.url || `/api/media/files/${media.ownerId}/${media.filename}`;
+          this.mediaUrls[productId] = url;
+        },
+        error: (err: unknown) => console.error("Failed to load media", err),
+      });
+    }
   }
 
   addToCart(product: Product): void {

@@ -52,6 +52,59 @@
   margin-bottom: $spacing-md;
 }
 
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--hover-bg);
+  color: var(--text-color);
+}
+
+.status-pending {
+  background: #fff9e6;
+  color: #1f1f1f;
+}
+
+.status-confirmed {
+  background: #eef5ff;
+  color: #1f1f1f;
+}
+
+.status-shipped {
+  background: #edf9f4;
+  color: #1f1f1f;
+}
+
+.status-delivered {
+  background: #eff9f2;
+  color: #1f1f1f;
+}
+
+.status-cancelled {
+  background: #fff0ed;
+  color: #1f1f1f;
+}
+
+.status-returned {
+  background: #f7eefb;
+  color: #1f1f1f;
+}
+
+.status-refunded {
+  background: #f4f6f7;
+  color: #1f1f1f;
+}
+
 .items {
   list-style: none;
   padding: 0;

@@ -40,6 +40,47 @@
         <label for="avatar" class="btn btn-secondary">Change Avatar</label>
       </div>
     </div>
+    <div class="seller-stats" *ngIf="sellerProfile">
+      <div class="stat-card">
+        <div class="stat-header">
+          <h3>Store Overview</h3>
+          <span
+            class="badge"
+            [class.verified]="sellerProfile.verified"
+            [class.unverified]="!sellerProfile.verified"
+          >
+            {{ sellerProfile.verified ? "Verified" : "Unverified" }}
+          </span>
+        </div>
+        <p class="stat-row">
+          <strong>Store:</strong>
+          {{ sellerProfile.storeName || "My store" }}
+        </p>
+        <p class="stat-row">
+          <strong>Total revenue:</strong>
+          {{ sellerProfile.totalRevenue | currency }}
+        </p>
+        <p class="stat-row">
+          <strong>Products sold:</strong>
+          {{ sellerProfile.totalProductsSold }}
+        </p>
+        <p class="stat-row">
+          <strong>Average rating:</strong>
+          {{ sellerProfile.averageRating }}
+          <span class="stat-muted"
+            >({{ sellerProfile.totalReviews }} reviews)</span
+          >
+        </p>
+        <button
+          class="btn btn-secondary verify-btn"
+          type="button"
+          [disabled]="sellerProfile.verified"
+          (click)="requestVerification()"
+        >
+          {{ sellerProfile.verified ? "Verified" : "Request verification" }}
+        </button>
+      </div>
+    </div>
   </section>
 
   <!-- Create Product Section -->

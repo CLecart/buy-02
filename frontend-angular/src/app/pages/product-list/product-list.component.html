@@ -48,12 +48,17 @@
     <div class="product-card" *ngFor="let product of products">
       <div class="product-image">
         <img
-          *ngIf="product.mediaIds?.length"
-          [src]="'/api/media/' + product.mediaIds[0]"
+          *ngIf="product.mediaIds?.length && mediaUrls[product.id || '']"
+          [src]="mediaUrls[product.id || '']"
           [alt]="product.name"
           (error)="onImageError($event)"
         />
-        <div *ngIf="!product.mediaIds?.length" class="no-image">No Image</div>
+        <div
+          *ngIf="!product.mediaIds?.length || !mediaUrls[product.id || '']"
+          class="no-image"
+        >
+          No Image
+        </div>
       </div>
       <div class="product-info">
         <h3>{{ product.name }}</h3>
