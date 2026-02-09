@@ -23,7 +23,7 @@ export class MediaService {
     "image/gif",
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Upload media for a product (SELLER only).
@@ -45,7 +45,7 @@ export class MediaService {
 
     return this.http.post<MediaUploadResponse>(
       `${this.API_URL}/upload`,
-      formData
+      formData,
     );
   }
 
@@ -55,7 +55,7 @@ export class MediaService {
   getMedia(
     page: number = 0,
     size: number = 20,
-    productId?: string
+    productId?: string,
   ): Observable<Page<Media>> {
     let params = new HttpParams()
       .set("page", page.toString())

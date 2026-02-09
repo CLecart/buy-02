@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, HostListener, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
@@ -40,7 +40,7 @@ export class SellerDashboardComponent implements OnInit {
     private readonly productService: ProductService,
     private readonly mediaService: MediaService,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -61,13 +61,13 @@ export class SellerDashboardComponent implements OnInit {
     this.productService
       .getProducts(0, 100, { sellerId: this.currentUser?.id })
       .subscribe({
-      next: (page: Page<Product>) => {
-        // Filter to only show user's products
-        this.myProducts = page.content.filter(
-          (p: Product) => p.ownerId === this.currentUser?.id
-        );
-      },
-    });
+        next: (page: Page<Product>) => {
+          // Filter to only show user's products
+          this.myProducts = page.content.filter(
+            (p: Product) => p.ownerId === this.currentUser?.id,
+          );
+        },
+      });
   }
 
   saveProduct(): void {
@@ -81,7 +81,8 @@ export class SellerDashboardComponent implements OnInit {
           },
           error: (err: { error?: { message?: string }; message?: string }) =>
             alert(
-              "Failed to update product: " + (err.error?.message || err.message)
+              "Failed to update product: " +
+                (err.error?.message || err.message),
             ),
         });
     } else {
@@ -98,7 +99,7 @@ export class SellerDashboardComponent implements OnInit {
         },
         error: (err: { error?: { message?: string }; message?: string }) =>
           alert(
-            "Failed to create product: " + (err.error?.message || err.message)
+            "Failed to create product: " + (err.error?.message || err.message),
           ),
       });
     }
@@ -126,7 +127,7 @@ export class SellerDashboardComponent implements OnInit {
         next: () => this.loadMyProducts(),
         error: (err: { error?: { message?: string }; message?: string }) =>
           alert(
-            "Failed to delete product: " + (err.error?.message || err.message)
+            "Failed to delete product: " + (err.error?.message || err.message),
           ),
       });
     }
@@ -145,7 +146,7 @@ export class SellerDashboardComponent implements OnInit {
       this.authService.uploadAvatar(file).subscribe({
         error: (err: { error?: { message?: string }; message?: string }) =>
           alert(
-            "Failed to upload avatar: " + (err.error?.message || err.message)
+            "Failed to upload avatar: " + (err.error?.message || err.message),
           ),
       });
     }
@@ -163,8 +164,9 @@ export class SellerDashboardComponent implements OnInit {
     this.productMedia = [];
   }
 
-  onModalBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
+  @HostListener("document:keydown.escape")
+  handleEscape(): void {
+    if (this.selectedProductForMedia) {
       this.closeMediaManager();
     }
   }

@@ -14,13 +14,20 @@
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.json",
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             },
-            "assets": ["src/favicon.svg", "src/assets"],
-            "styles": ["src/styles.scss"],
+            "assets": [
+              "src/favicon.svg",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -45,11 +52,23 @@
               "browserTarget": "frontend-angular:build:production"
             }
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
   "cli": {
-    "analytics": "b1b43c62-9115-444c-9c93-d3e783809fdb"
+    "analytics": "b1b43c62-9115-444c-9c93-d3e783809fdb",
+    "schematicCollections": [
+      "angular-eslint"
+    ]
   }
 }
