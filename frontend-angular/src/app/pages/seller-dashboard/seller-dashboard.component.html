@@ -183,6 +183,9 @@
     open
     (click)="onModalBackdropClick($event)"
     (keydown.escape)="closeMediaManager()"
+    role="dialog"
+    aria-modal="true"
+    tabindex="0"
   >
     <div class="modal-content">
       <div class="modal-header">
