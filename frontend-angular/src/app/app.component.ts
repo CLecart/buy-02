@@ -4,7 +4,6 @@ import { RouterOutlet, RouterLink } from "@angular/router";
 import { AuthService } from "./services/auth.service";
 import { User } from "./models/user.model";
 import { ThemeToggleComponent } from "./components/theme-toggle/theme-toggle.component";
-
 /**
  * AppComponent is the root component for the buy-02 frontend.
  *
@@ -20,7 +19,6 @@ import { ThemeToggleComponent } from "./components/theme-toggle/theme-toggle.com
         <a routerLink="/">buy-02</a>
       </div>
       <nav class="nav-links">
-        <a routerLink="/">Products</a>
         <a *ngIf="currentUser" routerLink="/cart">Cart</a>
         <a *ngIf="currentUser" routerLink="/orders">Orders</a>
         <a *ngIf="currentUser" routerLink="/profile">Profile</a>
