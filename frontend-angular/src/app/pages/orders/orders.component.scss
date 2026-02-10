@@ -71,38 +71,38 @@
 }
 
 .status-pending {
-  background: #fff9e6;
-  color: #1f1f1f;
+  background: var(--order-status-pending-bg);
+  color: var(--order-status-text);
 }
 
 .status-confirmed {
-  background: #eef5ff;
-  color: #1f1f1f;
+  background: var(--order-status-confirmed-bg);
+  color: var(--order-status-text);
 }
 
 .status-shipped {
-  background: #edf9f4;
-  color: #1f1f1f;
+  background: var(--order-status-shipped-bg);
+  color: var(--order-status-text);
 }
 
 .status-delivered {
-  background: #eff9f2;
-  color: #1f1f1f;
+  background: var(--order-status-delivered-bg);
+  color: var(--order-status-text);
 }
 
 .status-cancelled {
-  background: #fff0ed;
-  color: #1f1f1f;
+  background: var(--order-status-cancelled-bg);
+  color: var(--order-status-text);
 }
 
 .status-returned {
-  background: #f7eefb;
-  color: #1f1f1f;
+  background: var(--order-status-returned-bg);
+  color: var(--order-status-text);
 }
 
 .status-refunded {
-  background: #f4f6f7;
-  color: #1f1f1f;
+  background: var(--order-status-refunded-bg);
+  color: var(--order-status-text);
 }
 
 .items {

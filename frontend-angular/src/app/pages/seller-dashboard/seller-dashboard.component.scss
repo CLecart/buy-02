@@ -132,13 +132,13 @@
 }
 
 .badge.verified {
-  background: #eff9f3;
-  color: #1f1f1f;
+  background: var(--badge-verified-bg);
+  color: var(--order-status-text);
 }
 
 .badge.unverified {
-  background: #fff0ea;
-  color: #1f1f1f;
+  background: var(--badge-unverified-bg);
+  color: var(--order-status-text);
 }
 
 .stat-row {
