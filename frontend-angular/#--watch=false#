@@ -1,0 +1,4 @@
+ ng test --browsers=ChromeHeadless --watch=false
+ npm run build
+ npm run audit
+ npm run build && npm audit --audit-level=high
