@@ -8,12 +8,9 @@ import { Observable } from "rxjs";
 
 const TOKEN_KEY = "auth_token";
 
-/**
- * Functional HTTP interceptor that adds the JWT token to outgoing requests.
- */
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
-  next: HttpHandlerFn
+  next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> => {
   const token = localStorage.getItem(TOKEN_KEY);
 

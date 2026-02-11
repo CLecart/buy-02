@@ -5,9 +5,6 @@ import { Router, RouterLink } from "@angular/router";
 import { AuthService } from "../../services/auth.service";
 import { SigninRequest } from "../../models/user.model";
 
-/**
- * Sign-in page component.
- */
 @Component({
   selector: "app-signin",
   standalone: true,
@@ -20,7 +17,10 @@ export class SigninComponent {
   loading = false;
   errorMessage = "";
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
 
   onSubmit(): void {
     this.loading = true;
@@ -28,10 +28,13 @@ export class SigninComponent {
 
     this.authService.signin(this.credentials).subscribe({
       next: () => {
-        // Load user info after successful signin
         this.authService.getMe().subscribe({
-          next: () => this.router.navigate(["/"]),
-          error: () => this.router.navigate(["/"]),
+          next: () => {
+            this.router.navigate(["/"]);
+          },
+          error: () => {
+            this.router.navigate(["/"]);
+          },
         });
       },
       error: (err: { error?: { message?: string } }) => {
