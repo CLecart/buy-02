@@ -13,43 +13,7 @@ import { ThemeToggleComponent } from "./components/theme-toggle/theme-toggle.com
   selector: "app-root",
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, ThemeToggleComponent],
-  template: `
-    <header class="navbar">
-      <div class="nav-brand">
-        <a routerLink="/">buy-02</a>
-      </div>
-      <nav class="nav-links">
-        <a *ngIf="currentUser" routerLink="/cart">Cart</a>
-        <a *ngIf="currentUser" routerLink="/orders">Orders</a>
-        <a *ngIf="currentUser" routerLink="/profile">Profile</a>
-        <a *ngIf="currentUser?.role === 'SELLER'" routerLink="/dashboard"
-          >Dashboard</a
-        >
-      </nav>
-      <div class="nav-auth">
-        <ng-container *ngIf="currentUser; else authLinks">
-          <span class="user-info">
-            <img
-              *ngIf="currentUser.avatarUrl"
-              [src]="currentUser.avatarUrl"
-              class="user-avatar"
-              alt="Avatar"
-            />
-            {{ currentUser.name }}
-          </span>
-          <button class="btn-logout" (click)="logout()">Logout</button>
-        </ng-container>
-        <ng-template #authLinks>
-          <a routerLink="/signin" class="nav-btn">Sign In</a>
-          <a routerLink="/signup" class="nav-btn nav-btn-primary">Sign Up</a>
-        </ng-template>
-        <app-theme-toggle></app-theme-toggle>
-      </div>
-    </header>
-    <main class="main-content">
-      <router-outlet></router-outlet>
-    </main>
-  `,
+  templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
 })
 export class AppComponent implements OnInit {
@@ -59,7 +23,6 @@ export class AppComponent implements OnInit {
   constructor(private readonly authService: AuthService) {}
 
   ngOnInit(): void {
-    this.authService.init();
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });

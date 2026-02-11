@@ -1,6 +1,3 @@
-/**
- * User model representing a registered user.
- */
 export interface User {
   id: string;
   name: string;
@@ -9,9 +6,6 @@ export interface User {
   avatarUrl?: string;
 }
 
-/**
- * Signup request DTO.
- */
 export interface SignupRequest {
   name: string;
   email: string;
@@ -19,9 +13,6 @@ export interface SignupRequest {
   role: "CLIENT" | "SELLER";
 }
 
-/**
- * Signin request DTO.
- */
 export interface SigninRequest {
   email: string;
   password: string;

@@ -9,9 +9,6 @@ import { ProfileService } from "../../services/profile.service";
 import { MediaService } from "../../services/media.service";
 import { Product, Page } from "../../models/product.model";
 
-/**
- * Product listing page - accessible to all users.
- */
 @Component({
   selector: "app-product-list",
   standalone: true,
