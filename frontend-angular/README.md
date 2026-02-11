@@ -1,3 +1,14 @@
+## Force CI cleanup
+
+If CI is blocked by lint errors or artifacts, make an empty commit:
+
+```bash
+git commit --allow-empty -m "chore: empty commit to force CI job"
+git push
+```
+
+This will trigger a new CI job and help verify corrections.
+
 # Frontend Angular
 
 Angular 17+ SPA for the buy-02 e-commerce platform.
