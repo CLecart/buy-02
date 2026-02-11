@@ -39,10 +39,27 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
     "typescript": "~5.1.6",
-    "typescript-eslint": "8.46.4"
+    "typescript-eslint": "8.46.4",
+    "husky": "^9.0.0",
+    "lint-staged": "^14.0.0"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "npm run lint -- --fix",
+      "git add"
+    ],
+    "src/**/*.html": [
+      "npm run lint -- --fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npx lint-staged"
+    }
   },
   "engines": {
-    "node": ">=18 <25",
+    "node": ">=18 <21",
     "npm": ">=8"
   }
 }

@@ -40,6 +40,8 @@ npm ci          # Install exact versions from lockfile
 npm start       # Starts on http://localhost:4200
 ```
 
+**Node version:** this project uses **Node.js 20 LTS**. Use your version manager and run `nvm use` inside the `frontend-angular/` folder (the `.nvmrc` file pins the major version to 20). CI is configured to run on Node 20 as well.
+
 The dev server uses `proxy.conf.json` to route API calls:
 
 - `/api/auth/*`, `/api/users/*` → localhost:8081 (user-service)
