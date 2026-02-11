@@ -30,6 +30,7 @@
     "@types/jasmine": "~4.3.0",
     "@types/node": "^18.16.19",
     "angular-eslint": "21.0.1",
+    "baseline-browser-mapping": "^2.9.19",
     "eslint": "^9.39.1",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
@@ -41,7 +42,7 @@
     "typescript-eslint": "8.46.4"
   },
   "engines": {
-    "node": ">=18.10.0",
+    "node": ">=18 <25",
     "npm": ">=8"
   }
 }
