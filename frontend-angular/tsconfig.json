@@ -2,7 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
-    "target": "ESNext",
+    "target": "ES2022",
     "useDefineForClassFields": false,
     "module": "ESNext",
     "moduleResolution": "Node",
