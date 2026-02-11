@@ -88,13 +88,20 @@ export class SignupComponent {
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
+        console.error("Signup error:", err);
         if (
           err.status === 409 ||
           (err.error?.message && /email/i.test(err.error.message))
         ) {
-          this.errorMessage = "Registration failed. Email is already in use.";
+          this.errorMessage =
+            err.error?.message ||
+            "Registration failed. Email is already in use.";
         } else {
-          this.errorMessage = "Registration failed. Please try again later.";
+          // Prefer server-provided message when available for better debugging
+          this.errorMessage =
+            err.error?.message ||
+            err.message ||
+            "Registration failed. Please try again later.";
         }
       },
     });
