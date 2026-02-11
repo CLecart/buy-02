@@ -97,7 +97,6 @@ export class ProductListComponent implements OnInit {
 
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    // prevent potential infinite loop if placeholder fails
     img.onerror = null;
     img.src = "assets/no-image.svg";
   }
@@ -117,7 +116,6 @@ export class ProductListComponent implements OnInit {
         },
         error: (err: unknown) => {
           console.error("Failed to load media", err);
-          // fallback to local placeholder to avoid repeated failing requests
           this.mediaUrls[productId] = "assets/no-image.svg";
         },
       });
