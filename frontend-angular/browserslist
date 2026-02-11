@@ -1,0 +1,7 @@
+# Target modern evergreen browsers to enable top-level await and modern JS
+last 2 chrome versions
+last 2 firefox versions
+last 2 safari versions
+last 2 edge versions
+not dead
+not ie 11
