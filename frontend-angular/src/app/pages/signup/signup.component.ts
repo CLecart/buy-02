@@ -97,7 +97,6 @@ export class SignupComponent {
             err.error?.message ||
             "Registration failed. Email is already in use.";
         } else {
-          // Prefer server-provided message when available for better debugging
           this.errorMessage =
             err.error?.message ||
             err.message ||
