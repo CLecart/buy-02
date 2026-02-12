@@ -6,5 +6,5 @@
   },
   // ...existing code...
   // 'files' property removed for CI conformity; entry points are handled via 'include'.
-  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts", "src/test.ts"]
 }

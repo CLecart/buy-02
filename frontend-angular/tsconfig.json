@@ -22,5 +22,6 @@
   // ...existing code...
   // 'files' property removed for CI conformity; entry points are handled via 'include'.
   "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/test.ts", "src/app/pages/cart/cart.component.spec.ts"]
   "exclude": ["node_modules", "dist"]
 }
