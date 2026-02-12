@@ -6,8 +6,8 @@ import { SellerDashboardComponent } from "./pages/seller-dashboard/seller-dashbo
 import { CartComponent } from "./pages/cart/cart.component";
 import { OrdersComponent } from "./pages/orders/orders.component";
 import { ProfileComponent } from "./pages/profile/profile.component";
+import { WishlistComponent } from "./pages/wishlist/wishlist.component";
 
-export const routes: Routes = [
   { path: "", component: ProductListComponent },
   { path: "signin", component: SigninComponent },
   { path: "signup", component: SignupComponent },
@@ -15,5 +15,6 @@ export const routes: Routes = [
   { path: "cart", component: CartComponent },
   { path: "orders", component: OrdersComponent },
   { path: "profile", component: ProfileComponent },
+  { path: "wishlist", component: WishlistComponent },
   { path: "**", redirectTo: "" },
 ];

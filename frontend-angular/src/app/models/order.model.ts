@@ -7,7 +7,13 @@ export type OrderStatus =
   | "RETURNED"
   | "REFUNDED";
 
-export type PaymentMethod = "PAY_ON_DELIVERY" | "PAYPAL" | "WALLET";
+export type PaymentMethod =
+  | "PAY_ON_DELIVERY"
+  | "CREDIT_CARD"
+  | "DEBIT_CARD"
+  | "PAYPAL"
+  | "BANK_TRANSFER"
+  | "WALLET";
 
 export interface OrderItem {
   productId: string;
