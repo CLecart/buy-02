@@ -26,6 +26,7 @@
     "node_modules",
     "dist",
     "src/test.ts",
-    "src/app/pages/cart/cart.component.spec.ts"
+    "src/app/pages/cart/cart.component.spec.ts",
+    "src/app/services/wishlist.service.spec.ts"
   ]
 }
