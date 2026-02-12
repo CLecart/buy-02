@@ -9,9 +9,6 @@ import { ProfileService } from "../../services/profile.service";
 import { MediaService } from "../../services/media.service";
 import { Product, Page } from "../../models/product.model";
 
-/**
- * Product listing page - accessible to all users.
- */
 @Component({
   selector: "app-product-list",
   standalone: true,
@@ -99,7 +96,9 @@ export class ProductListComponent implements OnInit {
   }
 
   onImageError(event: Event): void {
-    (event.target as HTMLImageElement).style.display = "none";
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = "assets/no-image.svg";
   }
 
   private resolveMediaUrls(products: Product[]): void {
@@ -115,7 +114,10 @@ export class ProductListComponent implements OnInit {
             media.url || `/api/media/files/${media.ownerId}/${media.filename}`;
           this.mediaUrls[productId] = url;
         },
-        error: (err: unknown) => console.error("Failed to load media", err),
+        error: (err: unknown) => {
+          console.error("Failed to load media", err);
+          this.mediaUrls[productId] = "assets/no-image.svg";
+        },
       });
     }
   }

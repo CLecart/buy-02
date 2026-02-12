@@ -1,0 +1,16 @@
+<div class="wishlist-container" *ngIf="wishlist">
+  <h2>My Wishlist</h2>
+  <button (click)="clearWishlist()" [disabled]="loading">Clear Wishlist</button>
+  <ul>
+    <li *ngFor="let item of wishlist.items">
+      <span>{{ item.productName }}</span>
+      <span>{{ item.price | currency }}</span>
+      <button (click)="removeItem(item.productId)" [disabled]="loading">
+        Remove
+      </button>
+      <!-- Optionally: Move to cart button -->
+    </li>
+  </ul>
+  <div *ngIf="wishlist.items.length === 0">No items in wishlist.</div>
+</div>
+<div *ngIf="loading">Loading...</div>

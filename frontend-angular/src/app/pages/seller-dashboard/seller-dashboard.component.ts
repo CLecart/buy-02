@@ -11,9 +11,6 @@ import { User } from "../../models/user.model";
 import { ProfileService } from "../../services/profile.service";
 import { SellerProfile } from "../../models/profile.model";
 
-/**
- * Seller dashboard for managing products and media.
- */
 @Component({
   selector: "app-seller-dashboard",
   standalone: true,
@@ -34,7 +31,6 @@ export class SellerDashboardComponent implements OnInit {
   };
   editingProduct: Product | null = null;
 
-  // Media manager
   selectedProductForMedia: Product | null = null;
   productMedia: Media[] = [];
   uploadError = "";
@@ -76,7 +72,6 @@ export class SellerDashboardComponent implements OnInit {
       .getProducts(0, 100, { sellerId: this.currentUser?.id })
       .subscribe({
         next: (page: Page<Product>) => {
-          // Filter to only show user's products
           this.myProducts = page.content.filter(
             (p: Product) => p.ownerId === this.currentUser?.id,
           );
@@ -171,7 +166,6 @@ export class SellerDashboardComponent implements OnInit {
     }
   }
 
-  // Avatar upload
   onAvatarSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -190,7 +184,6 @@ export class SellerDashboardComponent implements OnInit {
     }
   }
 
-  // Media Manager
   openMediaManager(product: Product): void {
     this.selectedProductForMedia = product;
     this.uploadError = "";

@@ -13,10 +13,8 @@ import { Page } from "../models/product.model";
 export class MediaService {
   private readonly API_URL = "/api/media";
 
-  /** Maximum file size in bytes (2MB). */
   public static readonly MAX_FILE_SIZE = 2 * 1024 * 1024;
 
-  /** Allowed MIME types for upload. */
   public static readonly ALLOWED_MIME_TYPES = [
     "image/jpeg",
     "image/png",
@@ -31,7 +29,6 @@ export class MediaService {
    * @param productId The product to associate the media with
    */
   uploadMedia(file: File, productId: string): Observable<MediaUploadResponse> {
-    // Client-side validation
     if (file.size > MediaService.MAX_FILE_SIZE) {
       throw new Error("File size exceeds 2MB limit");
     }

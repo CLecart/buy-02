@@ -1,6 +1,3 @@
-/**
- * Product model representing a seller's product.
- */
 export interface Product {
   id?: string;
   name: string;
@@ -12,9 +9,6 @@ export interface Product {
   mediaIds?: string[];
 }
 
-/**
- * Paginated response from the API.
- */
 export interface Page<T> {
   content: T[];
   totalElements: number;

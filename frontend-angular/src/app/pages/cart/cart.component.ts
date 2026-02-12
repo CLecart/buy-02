@@ -87,7 +87,7 @@ export class CartComponent implements OnInit {
       this.paymentMethod !== "PAY_ON_DELIVERY" &&
       !this.paymentReference.trim()
     ) {
-      alert("Payment reference is required for the selected method.");
+      alert("Payment reference is required for the selected payment method.");
       return;
     }
 

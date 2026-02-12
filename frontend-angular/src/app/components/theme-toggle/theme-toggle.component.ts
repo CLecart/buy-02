@@ -1,10 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
-/**
- * Theme toggle component for dark/light mode switching.
- * Persists user preference in localStorage.
- */
 @Component({
   selector: "app-theme-toggle",
   standalone: true,
@@ -21,8 +17,9 @@ export class ThemeToggleComponent implements OnInit {
     if (savedTheme) {
       this.isDark = savedTheme === "dark";
     } else {
-      // Check system preference
-      this.isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      this.isDark = globalThis.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
     }
     this.applyTheme();
   }
@@ -34,9 +31,6 @@ export class ThemeToggleComponent implements OnInit {
   }
 
   private applyTheme(): void {
-    document.documentElement.setAttribute(
-      "data-theme",
-      this.isDark ? "dark" : "light"
-    );
+    document.documentElement.dataset.theme = this.isDark ? "dark" : "light";
   }
 }

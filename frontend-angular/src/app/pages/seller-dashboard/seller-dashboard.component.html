@@ -1,26 +1,16 @@
-<!-- Seller dashboard for managing products and media -->
 <div class="container">
   <div class="header">
     <div>
       <h1>Seller Dashboard</h1>
       <p *ngIf="currentUser">Welcome, {{ currentUser.name }}</p>
     </div>
-    <div class="header-actions">
-      <a routerLink="/" class="btn btn-secondary">View All Products</a>
-    </div>
+    <div class="header-actions"></div>
   </div>
 
-  <!-- Profile Section -->
   <section class="section profile-section" *ngIf="currentUser">
     <h2>Profile</h2>
     <div class="profile-card">
       <div class="avatar-container">
-        <img
-          *ngIf="currentUser.avatarUrl"
-          [src]="currentUser.avatarUrl"
-          alt="Avatar"
-          class="avatar"
-        />
         <div *ngIf="!currentUser.avatarUrl" class="avatar-placeholder">
           {{ getInitials() }}
         </div>
@@ -83,7 +73,6 @@
     </div>
   </section>
 
-  <!-- Create Product Section -->
   <section class="section">
     <h2>{{ editingProduct ? "Edit Product" : "Create New Product" }}</h2>
     <form (ngSubmit)="saveProduct()" class="product-form">
@@ -160,7 +149,6 @@
     </form>
   </section>
 
-  <!-- My Products Section -->
   <section class="section">
     <h2>My Products ({{ myProducts.length }})</h2>
 
@@ -217,7 +205,6 @@
     </ng-template>
   </section>
 
-  <!-- Media Manager Modal -->
   <dialog class="modal" *ngIf="selectedProductForMedia" open aria-modal="true">
     <button
       type="button"
