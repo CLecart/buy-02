@@ -19,7 +19,8 @@
     "typeRoots": ["node_modules/@types"],
     "lib": ["ES2022", "dom"]
   },
-  "files": ["src/main.ts"],
+  // ...existing code...
+  // 'files' property removed for CI conformity; entry points are handled via 'include'.
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
