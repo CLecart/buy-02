@@ -8,6 +8,7 @@ import { OrdersComponent } from "./pages/orders/orders.component";
 import { ProfileComponent } from "./pages/profile/profile.component";
 import { WishlistComponent } from "./pages/wishlist/wishlist.component";
 
+export const routes: Routes = [
   { path: "", component: ProductListComponent },
   { path: "signin", component: SigninComponent },
   { path: "signup", component: SignupComponent },
