@@ -105,7 +105,9 @@ export class ProductListComponent implements OnInit {
     for (const product of products) {
       const productId = product.id;
       const mediaId = product.mediaIds?.[0];
-      if (!productId || !mediaId || this.mediaUrls[productId]) {
+      if (!productId) continue;
+      if (!mediaId) {
+        this.mediaUrls[productId] = "assets/no-image.svg";
         continue;
       }
       this.mediaService.getMediaById(mediaId).subscribe({
@@ -114,8 +116,7 @@ export class ProductListComponent implements OnInit {
             media.url || `/api/media/files/${media.ownerId}/${media.filename}`;
           this.mediaUrls[productId] = url;
         },
-        error: (err: unknown) => {
-          console.error("Failed to load media", err);
+        error: () => {
           this.mediaUrls[productId] = "assets/no-image.svg";
         },
       });
