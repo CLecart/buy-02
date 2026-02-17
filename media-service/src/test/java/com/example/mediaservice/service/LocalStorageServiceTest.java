@@ -7,19 +7,24 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.Mockito;
 
-public class LocalStorageServiceTest {
+class LocalStorageServiceTest {
 
     private final Path testRoot = Paths.get("target/test-media").toAbsolutePath().normalize();
 
     @AfterEach
-    void cleanup() throws Exception {
-        if (Files.exists(testRoot)) {
-            Files.walk(testRoot).sorted((a,b)->b.compareTo(a)).forEach(p -> p.toFile().delete());
+    void cleanup() {
+        try {
+            if (Files.exists(testRoot)) {
+                Files.walk(testRoot).sorted((a, b) -> b.compareTo(a)).forEach(p -> p.toFile().delete());
+            }
+        } catch (IOException e) {
+            // Ignoré : nettoyage best-effort
         }
     }
 
@@ -45,7 +50,7 @@ public class LocalStorageServiceTest {
     }
 
     @Test
-    void store_smallPng_succeedsAndFileExists() throws Exception {
+    void store_smallPng_succeedsAndFileExists() {
         String pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=";
         byte[] pngBytes = java.util.Base64.getDecoder().decode(pngBase64);
         MockMultipartFile file = new MockMultipartFile("file", "ok.png", "image/png", pngBytes);
@@ -54,13 +59,16 @@ public class LocalStorageServiceTest {
 
         Path rel = svc.store(file, null, null);
         Path absolute = testRoot.resolve(rel).normalize();
-
-        assertThat(Files.exists(absolute)).isTrue();
-        assertThat(Files.size(absolute)).isEqualTo(pngBytes.length);
+        try {
+            assertThat(Files.exists(absolute)).isTrue();
+            assertThat(Files.size(absolute)).isEqualTo(pngBytes.length);
+        } catch (IOException e) {
+            org.junit.jupiter.api.Assertions.fail("IOException should not occur: " + e.getMessage());
+        }
     }
 
     @Test
-    void store_withRepository_savesMetadataWithDimensions() throws Exception {
+    void store_withRepository_savesMetadataWithDimensions() {
         String pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=";
         byte[] pngBytes = java.util.Base64.getDecoder().decode(pngBase64);
         MockMultipartFile file = new MockMultipartFile("file", "ok.png", "image/png", pngBytes);

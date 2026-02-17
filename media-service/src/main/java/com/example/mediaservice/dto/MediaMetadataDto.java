@@ -4,9 +4,11 @@ import java.time.Instant;
 
 /**
  * DTO representing persisted media metadata returned by media listing endpoints.
- *
- * <p>Fields are informational and safe to expose to authenticated clients. The {@code ownerId}
+ * <p>
+ * Fields are informational and safe to expose to authenticated clients. The {@code ownerId}
  * indicates who uploaded the media and {@code productId} links to the owning product.
+ *
+ * <p>Use the {@link Builder} to construct instances for better readability and maintainability.
  */
 public class MediaMetadataDto {
     private String id;
@@ -21,24 +23,54 @@ public class MediaMetadataDto {
     private Integer width;
     private Integer height;
 
+    /**
+     * Default constructor.
+     */
     public MediaMetadataDto() {}
 
-    public MediaMetadataDto(String id, String ownerId, String productId, String filename, String originalName, String mimeType, long size, String checksum, Instant uploadedAt) {
-        this.id = id;
-        this.ownerId = ownerId;
-        this.productId = productId;
-        this.filename = filename;
-        this.originalName = originalName;
-        this.mimeType = mimeType;
-        this.size = size;
-        this.checksum = checksum;
-        this.uploadedAt = uploadedAt;
+    private MediaMetadataDto(Builder builder) {
+        this.id = builder.id;
+        this.ownerId = builder.ownerId;
+        this.productId = builder.productId;
+        this.filename = builder.filename;
+        this.originalName = builder.originalName;
+        this.mimeType = builder.mimeType;
+        this.size = builder.size;
+        this.checksum = builder.checksum;
+        this.uploadedAt = builder.uploadedAt;
+        this.width = builder.width;
+        this.height = builder.height;
     }
 
-    public MediaMetadataDto(String id, String ownerId, String productId, String filename, String originalName, String mimeType, long size, String checksum, Instant uploadedAt, Integer width, Integer height) {
-        this(id, ownerId, productId, filename, originalName, mimeType, size, checksum, uploadedAt);
-        this.width = width;
-        this.height = height;
+
+    /**
+     * Builder for {@link MediaMetadataDto}.
+     */
+    public static class Builder {
+        private String id;
+        private String ownerId;
+        private String productId;
+        private String filename;
+        private String originalName;
+        private String mimeType;
+        private long size;
+        private String checksum;
+        private Instant uploadedAt;
+        private Integer width;
+        private Integer height;
+
+        public Builder id(String id) { this.id = id; return this; }
+        public Builder ownerId(String ownerId) { this.ownerId = ownerId; return this; }
+        public Builder productId(String productId) { this.productId = productId; return this; }
+        public Builder filename(String filename) { this.filename = filename; return this; }
+        public Builder originalName(String originalName) { this.originalName = originalName; return this; }
+        public Builder mimeType(String mimeType) { this.mimeType = mimeType; return this; }
+        public Builder size(long size) { this.size = size; return this; }
+        public Builder checksum(String checksum) { this.checksum = checksum; return this; }
+        public Builder uploadedAt(Instant uploadedAt) { this.uploadedAt = uploadedAt; return this; }
+        public Builder width(Integer width) { this.width = width; return this; }
+        public Builder height(Integer height) { this.height = height; return this; }
+        public MediaMetadataDto build() { return new MediaMetadataDto(this); }
     }
 
     public String getId() { return id; }

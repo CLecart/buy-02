@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -22,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class MediaControllerOwnershipTest {
+class MediaControllerOwnershipTest {
 
     @Autowired
     MockMvc mvc;
@@ -40,7 +39,7 @@ public class MediaControllerOwnershipTest {
 
     @Test
     void upload_forOwner_allowed() throws Exception {
-        when(productClient.getOwnerId(eq("prod-1"))).thenReturn("owner-1");
+        when(productClient.getOwnerId("prod-1")).thenReturn("owner-1");
 
         byte[] pngBytes = java.util.Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=");
         MockMultipartFile file = new MockMultipartFile("file","test.png", MediaType.IMAGE_PNG_VALUE, pngBytes);
@@ -56,7 +55,7 @@ public class MediaControllerOwnershipTest {
 
     @Test
     void upload_forNonOwner_forbidden() throws Exception {
-        when(productClient.getOwnerId(eq("prod-1"))).thenReturn("someone-else");
+        when(productClient.getOwnerId("prod-1")).thenReturn("someone-else");
 
         byte[] pngBytes = java.util.Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=");
         MockMultipartFile file = new MockMultipartFile("file","test.png", MediaType.IMAGE_PNG_VALUE, pngBytes);

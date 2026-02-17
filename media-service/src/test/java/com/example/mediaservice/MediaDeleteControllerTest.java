@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class MediaDeleteControllerTest {
+class MediaDeleteControllerTest {
 
     @Autowired
     MockMvc mvc;

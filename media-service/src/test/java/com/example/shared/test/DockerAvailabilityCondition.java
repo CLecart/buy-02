@@ -26,6 +26,11 @@ public class DockerAvailabilityCondition implements ExecutionCondition {
             dockerAvailable = (rc == 0);
         } catch (Throwable t) {
             dockerAvailable = false;
+        // Intentionally left empty: no further action required if not present
+        // Intentionally left empty: no further action required if not present
+        // Intentionally left empty: no further action required if not present
+        // Intentionally left empty: no further action required if not present
+        // Intentionally left empty: no further action required if not present
         }
         return dockerAvailable;
     }
@@ -44,6 +49,7 @@ public class DockerAvailabilityCondition implements ExecutionCondition {
             Class<? extends Annotation> tc = tcRaw.asSubclass(Annotation.class);
             if (clazz.isAnnotationPresent(tc)) return DISABLED;
         } catch (ClassNotFoundException ignored) {
+            // Intentionally ignored: Testcontainers not present
         }
 
         for (Field f : clazz.getDeclaredFields()) {
@@ -57,8 +63,10 @@ public class DockerAvailabilityCondition implements ExecutionCondition {
                     Class<? extends Annotation> containerAnn = containerAnnRaw.asSubclass(Annotation.class);
                     if (f.isAnnotationPresent(containerAnn)) return DISABLED;
                 } catch (ClassNotFoundException ignored) {
+                    // Intentionally ignored: Testcontainers Container annotation not present
                 }
             } catch (Throwable ignored) {
+                // Intentionally left empty: no further action required if not present
             }
         }
 

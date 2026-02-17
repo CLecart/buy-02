@@ -66,7 +66,7 @@ public class OrderController {
      * @return order DTO
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDTO> getOrder(@PathVariable @NonNull String orderId) {
+    public ResponseEntity<OrderDTO> getOrder(@PathVariable("orderId") @NonNull String orderId) {
         log.info("GET /api/orders/{} - Fetching order", orderId);
         OrderDTO order = orderService.getOrderById(orderId);
         enforceOrderAccess(order);
@@ -78,9 +78,9 @@ public class OrderController {
      * GET /api/orders/me
      */
     @GetMapping("/me")
-    public ResponseEntity<Page<OrderDTO>> getMyOrders(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) OrderStatus status,
+        public ResponseEntity<Page<OrderDTO>> getMyOrders(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) OrderStatus status,
             Pageable pageable
     ) {
         String buyerId = getCurrentUserId();
@@ -93,9 +93,9 @@ public class OrderController {
      * GET /api/orders/seller/me
      */
     @GetMapping("/seller/me")
-    public ResponseEntity<Page<OrderDTO>> getMySellerOrders(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) OrderStatus status,
+        public ResponseEntity<Page<OrderDTO>> getMySellerOrders(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) OrderStatus status,
             Pageable pageable
     ) {
         String sellerId = getCurrentUserId();
@@ -111,11 +111,11 @@ public class OrderController {
      * @param pageable pagination info
      * @return page of orders
      */
-    @GetMapping("/buyer/{buyerId}")
-    public ResponseEntity<Page<OrderDTO>> getOrdersByBuyer(
-            @PathVariable String buyerId,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) OrderStatus status,
+        @GetMapping("/buyer/{buyerId}")
+        public ResponseEntity<Page<OrderDTO>> getOrdersByBuyer(
+            @PathVariable("buyerId") String buyerId,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) OrderStatus status,
             Pageable pageable
     ) {
         log.info("GET /api/orders/buyer/{} - Fetching orders for buyer", buyerId);
@@ -132,11 +132,11 @@ public class OrderController {
      * @param pageable pagination info
      * @return page of orders
      */
-    @GetMapping("/seller/{sellerId}")
-    public ResponseEntity<Page<OrderDTO>> getOrdersBySeller(
-            @PathVariable String sellerId,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) OrderStatus status,
+        @GetMapping("/seller/{sellerId}")
+        public ResponseEntity<Page<OrderDTO>> getOrdersBySeller(
+            @PathVariable("sellerId") String sellerId,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) OrderStatus status,
             Pageable pageable
     ) {
         log.info("GET /api/orders/seller/{} - Fetching orders for seller", sellerId);
@@ -153,9 +153,9 @@ public class OrderController {
      * @param pageable pagination info
      * @return page of orders
      */
-    @GetMapping("/status/{status}")
-    public ResponseEntity<Page<OrderDTO>> getOrdersByStatus(
-            @PathVariable OrderStatus status,
+        @GetMapping("/status/{status}")
+        public ResponseEntity<Page<OrderDTO>> getOrdersByStatus(
+            @PathVariable("status") OrderStatus status,
             Pageable pageable
     ) {
         log.info("GET /api/orders/status/{} - Fetching orders with status", status);
@@ -172,10 +172,10 @@ public class OrderController {
      * @param pageable pagination info
      * @return page of orders
      */
-    @GetMapping("/buyer/{buyerId}/status/{status}")
-    public ResponseEntity<Page<OrderDTO>> getOrdersByBuyerAndStatus(
-            @PathVariable String buyerId,
-            @PathVariable OrderStatus status,
+        @GetMapping("/buyer/{buyerId}/status/{status}")
+        public ResponseEntity<Page<OrderDTO>> getOrdersByBuyerAndStatus(
+            @PathVariable("buyerId") String buyerId,
+            @PathVariable("status") OrderStatus status,
             Pageable pageable
     ) {
         log.info("GET /api/orders/buyer/{}/status/{} - Fetching orders", buyerId, status);
@@ -194,7 +194,7 @@ public class OrderController {
      */
     @PatchMapping("/{orderId}/status")
         public ResponseEntity<OrderDTO> updateOrderStatus(
-            @PathVariable @NonNull String orderId,
+            @PathVariable("orderId") @NonNull String orderId,
             @Valid @RequestBody UpdateOrderStatusRequest request
     ) {
         log.info("PATCH /api/orders/{}/status - Updating status to: {}", orderId, request.status());
@@ -212,7 +212,7 @@ public class OrderController {
      * @return cancelled order
      */
     @PatchMapping("/{orderId}/cancel")
-    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable @NonNull String orderId) {
+    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable("orderId") @NonNull String orderId) {
         log.info("PATCH /api/orders/{}/cancel - Cancelling order", orderId);
         String buyerId = getCurrentUserId();
         OrderDTO cancelledOrder = orderService.cancelOrder(orderId, buyerId);
@@ -224,7 +224,7 @@ public class OrderController {
      * DELETE /api/orders/{orderId}
      */
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable @NonNull String orderId) {
+    public ResponseEntity<Void> deleteOrder(@PathVariable("orderId") @NonNull String orderId) {
         String buyerId = getCurrentUserId();
         orderService.deleteOrder(orderId, buyerId);
         return ResponseEntity.noContent().build();
@@ -235,7 +235,7 @@ public class OrderController {
      * POST /api/orders/{orderId}/redo
      */
     @PostMapping("/{orderId}/redo")
-    public ResponseEntity<OrderDTO> redoOrder(@PathVariable @NonNull String orderId) {
+    public ResponseEntity<OrderDTO> redoOrder(@PathVariable("orderId") @NonNull String orderId) {
         String buyerId = getCurrentUserId();
         OrderDTO order = orderService.redoOrder(orderId, buyerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
@@ -249,7 +249,7 @@ public class OrderController {
      * @return order count
      */
     @GetMapping("/buyer/{buyerId}/count")
-    public ResponseEntity<Long> countOrdersByBuyer(@PathVariable String buyerId) {
+    public ResponseEntity<Long> countOrdersByBuyer(@PathVariable("buyerId") String buyerId) {
         log.info("GET /api/orders/buyer/{}/count - Counting orders", buyerId);
         enforceUserMatch(buyerId);
         long count = orderService.countOrdersByBuyer(buyerId);
@@ -264,7 +264,7 @@ public class OrderController {
      * @return order count
      */
     @GetMapping("/status/{status}/count")
-    public ResponseEntity<Long> countOrdersByStatus(@PathVariable OrderStatus status) {
+    public ResponseEntity<Long> countOrdersByStatus(@PathVariable("status") OrderStatus status) {
         log.info("GET /api/orders/status/{}/count - Counting orders", status);
         long count = orderService.countOrdersByStatus(status);
         return ResponseEntity.ok(count);

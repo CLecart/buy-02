@@ -1,0 +1,47 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify Node version matches .nvmrc
+        run: |
+          if [ -f frontend-angular/.nvmrc ]; then
+            EXPECTED=$(cat frontend-angular/.nvmrc)
+            ACTUAL=$(node -v | sed 's/^v//; s/\..*$//')
+            if [ "$ACTUAL" != "$EXPECTED" ]; then
+              echo "Node version mismatch: expected $EXPECTED but got $(node -v)" >&2
+              exit 1
+            fi
+          fi
+      - name: Install dependencies
+        working-directory: frontend-angular
+        run: npm ci
+      - name: Run lint
+        working-directory: frontend-angular
+        run: npm run lint
+      - name: Run build and fail on warnings
+        working-directory: frontend-angular
+        run: |
+          set -euo pipefail
+          # capture output and fail if any `Warning:` lines
+          # EXCEPTION: allow the specific top-level await compatibility warning which is emitted by the Angular toolchain
+          # when using top-level await; this is tracked in FRONTEND-ISSUE-TOPLEVELAWAIT.md for a permanent fix.
+          if npm run build --silent 2>&1 | tee build.log | grep -i "warning" | grep -vi "The generated code contains 'async/await' because this module is using \"topLevelAwait\""; then
+            echo "Build produced warnings — failing CI to enforce zero-warnings policy" >&2
+            cat build.log >&2
+            exit 1
+          fi

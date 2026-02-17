@@ -4,6 +4,7 @@
     "outDir": "./out-tsc/spec",
     "types": ["jasmine", "node"]
   },
-  "files": ["src/test.ts"],
-  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+  // ...existing code...
+  // 'files' property removed for CI conformity; entry points are handled via 'include'.
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts", "src/test.ts"]
 }

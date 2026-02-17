@@ -65,7 +65,7 @@ select {
 .error-message {
   color: var(--danger-color);
   padding: 0.75rem;
-  background: rgba(220, 53, 69, 0.1);
+  background: var(--error-bg);
   border-radius: $border-radius-sm;
   margin-bottom: $spacing-md;
 }

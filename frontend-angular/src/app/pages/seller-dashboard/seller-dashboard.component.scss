@@ -119,26 +119,26 @@
 
   h3 {
     margin: 0;
-    font-size: $font-size-md;
+    font-size: $font-size-base;
   }
 }
 
 .badge {
-  padding: $spacing-2xs $spacing-sm;
+  padding: $spacing-xs $spacing-sm;
   border-radius: $border-radius-full;
-  font-size: $font-size-xs;
+  font-size: $font-size-sm;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .badge.verified {
-  background: #eff9f3;
-  color: #1f1f1f;
+  background: var(--badge-verified-bg);
+  color: var(--order-status-text);
 }
 
 .badge.unverified {
-  background: #fff0ea;
-  color: #1f1f1f;
+  background: var(--badge-unverified-bg);
+  color: var(--order-status-text);
 }
 
 .stat-row {

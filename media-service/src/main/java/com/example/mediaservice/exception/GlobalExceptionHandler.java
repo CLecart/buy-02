@@ -12,16 +12,19 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    private static final String ERROR = "error";
+    private static final String MESSAGE = "message";
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public Map<String, Object> handleIllegalArgument(IllegalArgumentException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "invalid_argument");
-        body.put("message", ex.getMessage());
+        body.put(ERROR, "invalid_argument");
+        body.put(MESSAGE, ex.getMessage());
         return body;
     }
 
@@ -30,8 +33,8 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public Map<String, Object> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "file_too_large");
-        body.put("message", "File size exceeds maximum allowed size of 2MB");
+        body.put(ERROR, "file_too_large");
+        body.put(MESSAGE, "File size exceeds maximum allowed size of 2MB");
         return body;
     }
 
@@ -40,8 +43,8 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public Map<String, Object> handleFileStorage(FileStorageException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "internal_error");
-        body.put("message", ex.getMessage());
+        body.put(ERROR, "internal_error");
+        body.put(MESSAGE, ex.getMessage());
         return body;
     }
 
@@ -50,8 +53,8 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public Map<String, Object> handleValidation(Exception ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "invalid_argument");
-        body.put("message", ex.getMessage());
+        body.put(ERROR, "invalid_argument");
+        body.put(MESSAGE, ex.getMessage());
         return body;
     }
 }

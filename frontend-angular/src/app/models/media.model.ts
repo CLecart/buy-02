@@ -1,6 +1,3 @@
-/**
- * Media metadata model.
- */
 export interface Media {
   id: string;
   ownerId: string;
@@ -16,9 +13,6 @@ export interface Media {
   url?: string;
 }
 
-/**
- * Media upload response.
- */
 export interface MediaUploadResponse {
   filename: string;
   url: string;

@@ -10,12 +10,21 @@
 
 @use "variables" as *;
 
-// =============================================================================
-// LIGHT THEME (default)
-// =============================================================================
-
 :root {
-  // Primary colors
+  --badge-verified-bg: #eff9f3;
+  --badge-unverified-bg: #fff0ea;
+
+  --error-bg: rgba(220, 53, 69, 0.1);
+
+  --input-focus-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  --order-status-pending-bg: #fff9e6;
+  --order-status-confirmed-bg: #eef5ff;
+  --order-status-shipped-bg: #edf9f4;
+  --order-status-delivered-bg: #eff9f2;
+  --order-status-cancelled-bg: #fff0ed;
+  --order-status-returned-bg: #f7eefb;
+  --order-status-refunded-bg: #f4f6f7;
+  --order-status-text: #1f1f1f;
   --primary-color: #{$primary-light};
   --primary-hover: #{$primary-hover-light};
   --accent-color: #{$accent-light};
@@ -23,27 +32,33 @@
   --warning-color: #{$warning-light};
   --info-color: #{$info-light};
 
-  // Surfaces
   --bg-color: #{$bg-light};
   --surface-color: #{$surface-light};
   --hover-bg: #{$hover-bg-light};
 
-  // Text
   --text-color: #{$text-light};
   --text-muted: #{$text-muted-light};
 
-  // Borders and shadows
   --border-color: #{$border-light};
   --shadow: #{$shadow-light};
   --overlay-bg: #{$overlay-light};
 }
 
-// =============================================================================
-// DARK THEME
-// =============================================================================
-
 [data-theme="dark"] {
-  // Primary colors
+  --badge-verified-bg: var(--surface-color);
+  --badge-unverified-bg: var(--surface-color);
+
+  --error-bg: rgba(255, 107, 107, 0.15);
+
+  --input-focus-shadow: 0 0 0 3px rgba(74, 208, 255, 0.15);
+  --order-status-pending-bg: var(--surface-color);
+  --order-status-confirmed-bg: var(--surface-color);
+  --order-status-shipped-bg: var(--surface-color);
+  --order-status-delivered-bg: var(--surface-color);
+  --order-status-cancelled-bg: var(--surface-color);
+  --order-status-returned-bg: var(--surface-color);
+  --order-status-refunded-bg: var(--surface-color);
+  --order-status-text: var(--text-color);
   --primary-color: #{$primary-dark};
   --primary-hover: #{$primary-hover-dark};
   --accent-color: #{$accent-dark};
@@ -51,16 +66,13 @@
   --warning-color: #{$warning-dark};
   --info-color: #{$info-dark};
 
-  // Surfaces
   --bg-color: #{$bg-dark};
   --surface-color: #{$surface-dark};
   --hover-bg: #{$hover-bg-dark};
 
-  // Text
   --text-color: #{$text-dark};
   --text-muted: #{$text-muted-dark};
 
-  // Borders and shadows
   --border-color: #{$border-dark};
   --shadow: #{$shadow-dark};
   --overlay-bg: #{$overlay-dark};

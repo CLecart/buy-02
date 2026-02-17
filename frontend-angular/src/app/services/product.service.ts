@@ -3,9 +3,6 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { Product, Page } from "../models/product.model";
 
-/**
- * Product service for CRUD operations.
- */
 @Injectable({
   providedIn: "root",
 })
@@ -14,9 +11,6 @@ export class ProductService {
 
   constructor(private readonly http: HttpClient) {}
 
-  /**
-   * Get all products with pagination.
-   */
   getProducts(
     page: number = 0,
     size: number = 10,
@@ -27,7 +21,7 @@ export class ProductService {
       maxPrice?: number;
       sellerId?: string;
       inStock?: boolean;
-    } = {}
+    } = {},
   ): Observable<Page<Product>> {
     let params = new HttpParams()
       .set("page", page.toString())
@@ -60,30 +54,18 @@ export class ProductService {
     return this.http.get<Page<Product>>(this.API_URL, { params });
   }
 
-  /**
-   * Get a product by ID.
-   */
   getProduct(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.API_URL}/${id}`);
   }
 
-  /**
-   * Create a new product (SELLER only).
-   */
   createProduct(product: Product): Observable<Product> {
     return this.http.post<Product>(this.API_URL, product);
   }
 
-  /**
-   * Update an existing product (SELLER only, must be owner).
-   */
   updateProduct(id: string, product: Product): Observable<Product> {
     return this.http.put<Product>(`${this.API_URL}/${id}`, product);
   }
 
-  /**
-   * Delete a product (SELLER only, must be owner).
-   */
   deleteProduct(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`);
   }

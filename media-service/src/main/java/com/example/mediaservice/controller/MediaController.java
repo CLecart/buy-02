@@ -165,9 +165,19 @@ public class MediaController {
         if (mediaRepository == null) return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE).build();
         String nonNullId = java.util.Objects.requireNonNull(id, "id");
         return mediaRepository.findById(nonNullId)
-                .map(m -> new com.example.mediaservice.dto.MediaMetadataDto(
-                m.getId(), m.getOwnerId(), m.getProductId(), m.getFilename(), m.getOriginalName(), m.getMimeType(), m.getSize(), m.getChecksum(), m.getUploadedAt(), m.getWidth(), m.getHeight()
-                ))
+                .map(m -> new com.example.mediaservice.dto.MediaMetadataDto.Builder()
+                    .id(m.getId())
+                    .ownerId(m.getOwnerId())
+                    .productId(m.getProductId())
+                    .filename(m.getFilename())
+                    .originalName(m.getOriginalName())
+                    .mimeType(m.getMimeType())
+                    .size(m.getSize())
+                    .checksum(m.getChecksum())
+                    .uploadedAt(m.getUploadedAt())
+                    .width(m.getWidth())
+                    .height(m.getHeight())
+                    .build())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -288,18 +298,18 @@ public class MediaController {
     }
 
     private com.example.mediaservice.dto.MediaMetadataDto toMetadataDto(com.example.mediaservice.model.MediaFile m) {
-        return new com.example.mediaservice.dto.MediaMetadataDto(
-            m.getId(),
-            m.getOwnerId(),
-            m.getProductId(),
-            m.getFilename(),
-            m.getOriginalName(),
-            m.getMimeType(),
-            m.getSize(),
-            m.getChecksum(),
-            m.getUploadedAt(),
-            m.getWidth(),
-            m.getHeight()
-        );
+        return new com.example.mediaservice.dto.MediaMetadataDto.Builder()
+            .id(m.getId())
+            .ownerId(m.getOwnerId())
+            .productId(m.getProductId())
+            .filename(m.getFilename())
+            .originalName(m.getOriginalName())
+            .mimeType(m.getMimeType())
+            .size(m.getSize())
+            .checksum(m.getChecksum())
+            .uploadedAt(m.getUploadedAt())
+            .width(m.getWidth())
+            .height(m.getHeight())
+            .build();
     }
 }
