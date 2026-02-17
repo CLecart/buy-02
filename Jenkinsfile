@@ -59,15 +59,17 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo '📊 Analyzing code with SonarQube...'
-                sh '''
-                    mvn sonar:sonar \
-                        -Dsonar.projectKey=${JOB_NAME} \
-                        -Dsonar.projectName="${JOB_NAME}" \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.login=${SONAR_LOGIN} \
-                        -Dsonar.exclusions=node_modules/**,**/target/**,**/dist/**
-                '''
+                withCredentials([string(credentialsId: 'sonar-ci-token', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                        mvn sonar:sonar \
+                            -Dsonar.projectKey=buy-02-order-service \
+                            -Dsonar.projectName="buy-02 Order Service" \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.login=${SONAR_TOKEN} \
+                            -Dsonar.exclusions=node_modules/**,**/target/**,**/dist/**
+                    '''
+                }
             }
         }
 
