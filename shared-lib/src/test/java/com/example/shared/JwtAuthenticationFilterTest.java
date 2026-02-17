@@ -13,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Map;
 
-public class JwtAuthenticationFilterTest {
+class JwtAuthenticationFilterTest {
 
 
     @AfterEach
