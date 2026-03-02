@@ -21,7 +21,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("null")
 class ShoppingCartControllerTest {
 
     @Mock
@@ -91,7 +93,7 @@ class ShoppingCartControllerTest {
         var response = controller.deleteMyCart();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        Mockito.verify(cartService).deleteCart("user-4");
+        verify(cartService).deleteCart("user-4");
     }
 
     @Test
@@ -101,6 +103,48 @@ class ShoppingCartControllerTest {
         assertThatThrownBy(() -> controller.getCart("another-user"))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("Not allowed to access another user's cart");
+    }
+
+    @Test
+    void removeFromMyCart_removesItemSuccess() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("user-5", null));
+        ShoppingCartDTO dto = sampleCart("user-5");
+
+        Mockito.when(cartService.removeFromCart("user-5", "p-1")).thenReturn(dto);
+
+        var response = controller.removeFromMyCart("p-1");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dto);
+        verify(cartService).removeFromCart("user-5", "p-1");
+    }
+
+    @Test
+    void clearMyCart_clearsAllItems() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("user-6", null));
+        ShoppingCartDTO empty = new ShoppingCartDTO("cart-1", "user-6", List.of(), 
+                BigDecimal.ZERO, 0, LocalDateTime.now(), LocalDateTime.now());
+
+        Mockito.when(cartService.clearCart("user-6")).thenReturn(empty);
+
+        var response = controller.clearMyCart();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().items()).isEmpty();
+        verify(cartService).clearCart("user-6");
+    }
+
+    @Test
+    void getCart_allowsBuyerAccess() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("user-7", null));
+        ShoppingCartDTO dto = sampleCart("user-7");
+
+        Mockito.when(cartService.getOrCreateCart("user-7")).thenReturn(dto);
+
+        var response = controller.getCart("user-7");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dto);
     }
 
     private ShoppingCartDTO sampleCart(String userId) {
