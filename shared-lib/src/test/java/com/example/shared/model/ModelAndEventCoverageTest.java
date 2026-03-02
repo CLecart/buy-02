@@ -16,7 +16,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("null")
 class ModelAndEventCoverageTest {
 
     @Test
