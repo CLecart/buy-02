@@ -2,20 +2,21 @@
 
 ## 1. Code Source
 
-- Repo GitHub: [link]
-- Code in English, JavaDoc only, microservices structure
-- Example: Wishlist.java, README.md in each service
+- Repo GitHub: https://github.com/CLecart/buy-02
+- Code in English, JavaDoc style maintained for backend classes
+- Microservices structure validated (`user-service`, `product-service`, `media-service`, `order-service`, `shared-lib`)
 
 ## 2. CI/CD
 
-- GitHub Actions: .github/workflows/frontend-ci.yml
-- CI/CD logs (screenshots or links)
-- No warnings/errors (wishlist.service.spec.ts: no error)
+- GitHub Actions workflow: `.github/workflows/frontend-ci.yml`
+- Jenkins pipeline: `Jenkinsfile`
+- Latest merged PR used for compliance uplift: https://github.com/CLecart/buy-02/pull/39
 
 ## 3. Tests
 
-- Test files: /media-service/src/test/java/, /product-service/src/test/java/
-- Passing test results (CI/CD logs or reports)
+- Backend tests present across services (`src/test/java` in each Java module)
+- Shared-lib coverage gate enforced at verify (`shared-lib/pom.xml`, JaCoCo LINE >= 80%)
+- Full Maven verify passes on main branch
 
 ## 4. Documentation
 
@@ -27,22 +28,27 @@
 
 ## 5. Process
 
-- PR/merge/review on GitHub (screenshots or links)
-- GITHUB-CONFIGURATION.md (process explanation)
-- Gitea: mirror push only, no CI/CD, no PR
+- PR/merge/review process validated on GitHub (see PR #39)
+- Process explanation in `docs/GITHUB-CONFIGURATION.md`
+- Gitea (`origin`) used as mirror; GitHub used for PR and CI checks
 
 ## 6. Code Quality
 
-- sonar-project.properties
-- checkstyle.xml
-- pmd-ruleset.xml
-- SonarQube, ESLint, Checkstyle, PMD reports (logs/screenshots)
+- Config files present: `sonar-project.properties`, `config/checkstyle/checkstyle.xml`, `config/pmd/pmd-ruleset.xml`
+- Maven `verify` passes with static analysis configuration in parent `pom.xml`
+- JaCoCo threshold enforced for shared-lib to prevent coverage regression
 
 ## 7. Bonus: Multi-payment & Wishlist
 
-- Code and tests in relevant services
-- Documentation in README.md and WISHLIST-SCHEMA.md
+- Wishlist: backend service/repository/controller + frontend service/page + tests
+- Multi-payment: payment enums and order payment flow implemented/documented
 
 ---
 
-Add screenshots, links, and reports as needed for the audit.
+## Evidence Pack (recommended attachments)
+
+- CI run links (GitHub Actions + Jenkins)
+- PR link(s) with review comments and merge status
+- Maven verify output summary
+- JaCoCo report snapshots (`shared-lib/target/site/jacoco`)
+- Optional API smoke-test artifacts (`out/smoke`)

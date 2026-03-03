@@ -148,7 +148,7 @@ mvn sonar:sonar \
 - **Project Key**: buy-02
 - **Project Name**: buy-02 E-Commerce Platform
 - **Quality Gates**: Default (see sonar-project.properties)
-- **Coverage Threshold**: 70% for new code
+- **Coverage Threshold**: JaCoCo gate enforced in `shared-lib` (LINE >= 80%)
 
 ### Key Metrics
 
