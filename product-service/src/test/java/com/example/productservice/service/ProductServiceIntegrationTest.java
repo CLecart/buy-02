@@ -2,12 +2,14 @@ package com.example.productservice.service;
 
 import com.example.productservice.dto.ProductDto;
 import com.example.productservice.dto.ProductSearchRequest;
+import com.example.productservice.kafka.ProductEventProducer;
 import com.example.productservice.model.Product;
 import com.example.productservice.repository.ProductRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MongoDBContainer;
@@ -44,6 +46,9 @@ class ProductServiceIntegrationTest {
 
     @Autowired
     ProductRepository productRepository;
+
+    @MockBean
+    ProductEventProducer productEventProducer;
 
     @AfterEach
     void cleanup() {

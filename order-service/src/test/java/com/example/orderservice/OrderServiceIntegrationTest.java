@@ -6,6 +6,7 @@ import com.example.shared.model.PaymentMethod;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
@@ -31,6 +32,7 @@ class OrderServiceIntegrationTest {
     @DynamicPropertySource
     static void mongoProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
+        registry.add("APP_JWT_SECRET", () -> "test-secret-key-for-order-integration-32-characters");
     }
 
     @LocalServerPort
@@ -38,6 +40,12 @@ class OrderServiceIntegrationTest {
 
     @Autowired
     TestRestTemplate restTemplate;
+
+    @Autowired
+    com.example.shared.security.JwtService jwtService;
+
+    @MockBean
+    com.example.shared.kafka.EventProducer eventProducer;
 
     @Test
     void createAndGetOrder() {
@@ -60,6 +68,11 @@ class OrderServiceIntegrationTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        String token = Objects.requireNonNull(
+            jwtService.generateToken(req.buyerId(), java.util.Map.of("roles", "BUYER")),
+            "jwt token must not be null in integration test"
+        );
+        headers.setBearerAuth(token);
 
         HttpEntity<CreateOrderRequest> entity = new HttpEntity<>(req, headers);
 
@@ -70,8 +83,14 @@ class OrderServiceIntegrationTest {
         OrderDTO created = Objects.requireNonNull(createResp.getBody(), "create response body");
         assertThat(created.buyerId()).isEqualTo(req.buyerId());
 
-        ResponseEntity<OrderDTO> getResp = restTemplate.getForEntity(
-            url("/api/orders/" + created.id()), OrderDTO.class);
+        HttpHeaders getHeaders = new HttpHeaders();
+        getHeaders.setBearerAuth(token);
+        ResponseEntity<OrderDTO> getResp = restTemplate.exchange(
+            url("/api/orders/" + created.id()),
+            HttpMethod.GET,
+            new HttpEntity<Void>(getHeaders),
+            OrderDTO.class
+        );
 
         assertThat(getResp.getStatusCode()).isEqualTo(HttpStatus.OK);
         OrderDTO fetched = Objects.requireNonNull(getResp.getBody(), "get response body");

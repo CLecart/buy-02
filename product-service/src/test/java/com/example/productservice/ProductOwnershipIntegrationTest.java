@@ -1,11 +1,13 @@
 package com.example.productservice;
 
 import com.example.productservice.dto.ProductDto;
+import com.example.productservice.kafka.ProductEventProducer;
 import com.example.productservice.repository.ProductRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
@@ -51,6 +53,9 @@ class ProductOwnershipIntegrationTest {
 
     @Autowired
     ProductRepository productRepository;
+
+    @MockBean
+    ProductEventProducer productEventProducer;
 
     @AfterEach
     void after() { productRepository.deleteAll(); }
