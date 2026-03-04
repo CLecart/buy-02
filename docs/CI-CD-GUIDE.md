@@ -31,6 +31,17 @@ The buy-02 project follows industry best practices for Continuous Integration/Co
 
 ## Development Workflow
 
+### GitHub Actions Gates
+
+- `Frontend CI` workflow (`.github/workflows/frontend-ci.yml`) validates Angular lint/build on push/PR.
+- `Backend Strict Gate` workflow (`.github/workflows/backend-strict-gate.yml`) runs on push/PR to `main` and executes:
+
+```bash
+mvn -Pintegration -Panalysis -DskipITs=false verify
+```
+
+- A PR to `main` is expected to pass both workflows before merge.
+
 ### 1. Local Setup
 
 ```bash
@@ -86,7 +97,7 @@ mvn clean package
 ### 4. Create Pull Request
 
 - Push your branch to GitHub
-- Open a PR against `develop` branch
+- Open a PR against `main` branch
 - PR must follow template (.github/pull_request_template.md)
 - Ensure CI/CD pipeline passes
 - Request code reviews from team members
