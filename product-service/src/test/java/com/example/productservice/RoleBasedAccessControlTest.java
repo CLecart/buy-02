@@ -1,17 +1,17 @@
 package com.example.productservice;
 
+import com.example.productservice.kafka.ProductEventProducer;
 import com.example.shared.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.Map;
@@ -30,19 +30,13 @@ class RoleBasedAccessControlTest {
             DockerImageName.parse("mongo:6.0")
     );
 
-    static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:7.5.0")
-    );
-
     static {
-        Startables.deepStart(MONGO_CONTAINER, KAFKA_CONTAINER).join();
+        MONGO_CONTAINER.start();
     }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", MONGO_CONTAINER::getReplicaSetUrl);
-        registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
-        registry.add("spring.kafka.listener.auto-startup", () -> "true");
         registry.add("APP_JWT_SECRET", () -> "test-secret-key-for-jwt-signing-minimum-32-characters");
     }
 
@@ -54,6 +48,9 @@ class RoleBasedAccessControlTest {
 
     @Autowired
     private JwtService jwtService;
+
+    @MockBean
+    private ProductEventProducer productEventProducer;
 
     @Test
     void clientRole_cannotCreateProduct() {
