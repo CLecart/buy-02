@@ -117,6 +117,23 @@ mvn verify -Pintegration
 
 # Run integration tests for one module
 mvn -pl media-service -am verify -Pintegration
+
+# Run full strict verification (integration + static analysis)
+mvn -Pintegration -Panalysis -DskipITs=false verify
+
+# Run docker smoke test
+bash scripts/ci-smoke.sh
+```
+
+## CI Gates
+
+- `Frontend CI`: `.github/workflows/frontend-ci.yml`
+- `Backend Strict Gate`: `.github/workflows/backend-strict-gate.yml`
+
+The backend gate enforces the same strict command used locally:
+
+```bash
+mvn -Pintegration -Panalysis -DskipITs=false verify
 ```
 
 ## API Endpoints

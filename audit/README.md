@@ -9,6 +9,7 @@
 ## 2. CI/CD
 
 - GitHub Actions workflow: `.github/workflows/frontend-ci.yml`
+- GitHub Actions workflow: `.github/workflows/backend-strict-gate.yml`
 - Jenkins pipeline: `Jenkinsfile`
 - Latest merged PR used for compliance uplift: https://github.com/CLecart/buy-02/pull/39
 
