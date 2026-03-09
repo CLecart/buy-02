@@ -116,7 +116,7 @@ Reviewers must verify:
 
 ### 6. Merge & Deploy
 
-- Once approved and CI passes, squash and merge to `develop`
+- Once approved and CI passes, squash and merge to `main`
 - Jenkins automatically deploys to dev environment
 - Monitor logs in Jenkins for any issues
 
