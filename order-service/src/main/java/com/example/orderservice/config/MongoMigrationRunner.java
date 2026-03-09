@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Lightweight MongoDB migration runner that ensures required collections and indexes exist.
@@ -29,8 +30,14 @@ public class MongoMigrationRunner {
     private static final String FIELD_BUYER_ID = "buyerId";
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_USER_ID = "userId";
+    private static final String FIELD_SELLER_ID = "sellerId";
+    private static final String FIELD_ITEMS_SELLER_ID = "items.sellerId";
+    private static final String FIELD_CREATED_AT = "createdAt";
+    private static final String FIELD_UPDATED_AT = "updatedAt";
+    private static final String FIELD_TOTAL_ORDERS = "totalOrders";
     private static final String FIELD_TOTAL_SPENT = "totalSpent";
     private static final String FIELD_TOTAL_REVENUE = "totalRevenue";
+    private static final String FIELD_AVERAGE_RATING = "averageRating";
 
     public MongoMigrationRunner(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
@@ -46,17 +53,50 @@ public class MongoMigrationRunner {
         createCollectionIfMissing(COLLECTION_SELLER_PROFILES);
 
         // Indexes for orders
-        mongoTemplate.indexOps(COLLECTION_ORDERS).ensureIndex(new Index().on(FIELD_BUYER_ID, org.springframework.data.domain.Sort.Direction.ASC));
-        mongoTemplate.indexOps(COLLECTION_ORDERS).ensureIndex(new Index().on(FIELD_STATUS, org.springframework.data.domain.Sort.Direction.ASC));
+        mongoTemplate.indexOps(COLLECTION_ORDERS).ensureIndex(
+            new Index()
+                .on(FIELD_BUYER_ID, org.springframework.data.domain.Sort.Direction.ASC)
+                .on(FIELD_CREATED_AT, org.springframework.data.domain.Sort.Direction.DESC)
+        );
+        mongoTemplate.indexOps(COLLECTION_ORDERS).ensureIndex(
+            new Index()
+                .on(FIELD_ITEMS_SELLER_ID, org.springframework.data.domain.Sort.Direction.ASC)
+                .on(FIELD_CREATED_AT, org.springframework.data.domain.Sort.Direction.DESC)
+        );
+        mongoTemplate.indexOps(COLLECTION_ORDERS).ensureIndex(
+            new Index()
+                .on(FIELD_STATUS, org.springframework.data.domain.Sort.Direction.ASC)
+                .on(FIELD_CREATED_AT, org.springframework.data.domain.Sort.Direction.DESC)
+        );
 
         // Indexes for carts and wishlist
         // Ensure unique index on cart owner
         mongoTemplate.indexOps(COLLECTION_CARTS).ensureIndex(new Index().on(FIELD_USER_ID, org.springframework.data.domain.Sort.Direction.ASC).unique());
-        mongoTemplate.indexOps(COLLECTION_WISHLISTS).ensureIndex(new Index().on(FIELD_USER_ID, org.springframework.data.domain.Sort.Direction.ASC));
+        // Auto-delete inactive carts after 90 days based on last update timestamp.
+        mongoTemplate.indexOps(COLLECTION_CARTS).ensureIndex(
+            new Index()
+                .on(FIELD_UPDATED_AT, org.springframework.data.domain.Sort.Direction.ASC)
+                .expire(90, TimeUnit.DAYS)
+        );
+        mongoTemplate.indexOps(COLLECTION_WISHLISTS).ensureIndex(
+            new Index().on(FIELD_USER_ID, org.springframework.data.domain.Sort.Direction.ASC).unique()
+        );
 
         // Indexes for profiles
+        mongoTemplate.indexOps(COLLECTION_USER_PROFILES).ensureIndex(
+            new Index().on(FIELD_USER_ID, org.springframework.data.domain.Sort.Direction.ASC).unique()
+        );
+        mongoTemplate.indexOps(COLLECTION_USER_PROFILES).ensureIndex(
+            new Index().on(FIELD_TOTAL_ORDERS, org.springframework.data.domain.Sort.Direction.DESC)
+        );
         mongoTemplate.indexOps(COLLECTION_USER_PROFILES).ensureIndex(new Index().on(FIELD_TOTAL_SPENT, org.springframework.data.domain.Sort.Direction.DESC));
+        mongoTemplate.indexOps(COLLECTION_SELLER_PROFILES).ensureIndex(
+            new Index().on(FIELD_SELLER_ID, org.springframework.data.domain.Sort.Direction.ASC).unique()
+        );
         mongoTemplate.indexOps(COLLECTION_SELLER_PROFILES).ensureIndex(new Index().on(FIELD_TOTAL_REVENUE, org.springframework.data.domain.Sort.Direction.DESC));
+        mongoTemplate.indexOps(COLLECTION_SELLER_PROFILES).ensureIndex(
+            new Index().on(FIELD_AVERAGE_RATING, org.springframework.data.domain.Sort.Direction.DESC)
+        );
     }
 
     private void createCollectionIfMissing(String name) {

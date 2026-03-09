@@ -85,6 +85,7 @@ Purchase orders placed by customers.
 {
   _id: ObjectId,
   buyerId: ObjectId,
+  buyerEmail: string,
   items: [
     {
       productId: ObjectId,
@@ -161,16 +162,16 @@ Current shopping carts for active users.
     }
   ],
   totalPrice: decimal,
+  itemCount: number,
   createdAt: datetime,
-  updatedAt: datetime,
-  lastModifiedAt: datetime
+  updatedAt: datetime
 }
 ```
 
 **Indexes:**
 
 - `{userId: 1}` - Unique cart per user
-- TTL: 90 days (auto-delete inactive carts)
+- `{updatedAt: 1}` with TTL 90 days - Auto-delete inactive carts
 
 **Purpose:**
 
@@ -200,6 +201,7 @@ Extended customer profile information.
   averageOrderValue: decimal,
   favoriteProductIds: [ObjectId],
   mostPurchasedProductIds: [ObjectId],
+  purchasedProductCounts: {productId: number},
   avatarMediaId: ObjectId,
   lastOrderDate: datetime,
   createdAt: datetime,
@@ -230,7 +232,7 @@ Extended seller/store information.
   _id: ObjectId,
   sellerId: ObjectId (unique),
   storeName: string,
-  description: string,
+  storeDescription: string,
   phone: string,
   businessAddress: string,
   city: string,
@@ -246,7 +248,7 @@ Extended seller/store information.
   topRatedProductIds: [ObjectId],
   logoMediaId: ObjectId,
   bannerMediaId: ObjectId,
-  isActive: boolean,
+  verified: boolean,
   lastOrderDate: datetime,
   createdAt: datetime,
   updatedAt: datetime
@@ -258,8 +260,6 @@ Extended seller/store information.
 - `{sellerId: 1}` - Unique profile per seller
 - `{totalRevenue: -1}` - Top sellers by revenue
 - `{averageRating: -1}` - Top rated sellers
-- `{totalProductsSold: -1}` - Best sellers by volume
-- `{isActive: 1}` - Active sellers
 
 **Purpose:**
 
@@ -308,9 +308,9 @@ shopping_carts (1) ─── many ─── cart_items (embedded)
 - Optimize common queries: `{buyerId, createdAt}`, `{status, createdAt}`
 - Support sorting and filtering simultaneously
 
-### 4. TTL Indexes (Future)
+### 4. TTL Indexes
 
-- Automatic cart cleanup after 90 days of inactivity
+- Automatic cart cleanup after 90 days of inactivity on `shopping_carts.updatedAt`
 - Reduces storage costs
 
 ### 5. Atomicity
