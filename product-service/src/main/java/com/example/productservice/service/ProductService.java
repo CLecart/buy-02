@@ -143,8 +143,13 @@ public class ProductService {
     }
 
     private void addPriceCriteria(List<Criteria> criteriaList, BigDecimal minPrice, BigDecimal maxPrice) {
+        if (minPrice != null && maxPrice != null) {
+            criteriaList.add(Criteria.where("price").gte(minPrice).lte(maxPrice));
+            return;
+        }
         if (minPrice != null) {
             criteriaList.add(Criteria.where("price").gte(minPrice));
+            return;
         }
         if (maxPrice != null) {
             criteriaList.add(Criteria.where("price").lte(maxPrice));

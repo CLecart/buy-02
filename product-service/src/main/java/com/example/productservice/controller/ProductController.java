@@ -84,6 +84,9 @@ public class ProductController {
         @RequestParam(name = "sellerId", required = false) String sellerId,
         @RequestParam(name = "inStock", required = false) Boolean inStock
     ) {
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("minPrice must be less than or equal to maxPrice");
+        }
         ProductSearchRequest filter = new ProductSearchRequest(search, category, minPrice, maxPrice, sellerId, inStock);
         Page<ProductDto> p = productService.listProducts(page, size, filter);
         return ResponseEntity.ok(p);
