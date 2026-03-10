@@ -1,6 +1,7 @@
 package com.example.productservice.controller;
 
 import com.example.shared.dto.SellerProfileDTO;
+import com.example.shared.exception.UnauthorizedException;
 import com.example.shared.service.SellerProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -34,6 +36,19 @@ public class SellerProfileController {
     @GetMapping("/{sellerId}")
     public ResponseEntity<SellerProfileDTO> getProfile(@PathVariable String sellerId) {
         log.info("GET /api/profiles/sellers/{} - Fetching profile", sellerId);
+        SellerProfileDTO profile = profileService.getOrCreateProfile(sellerId);
+        return ResponseEntity.ok(profile);
+    }
+
+    /**
+     * Get current seller profile.
+     * GET /api/profiles/sellers/me
+     */
+    @GetMapping("/me")
+    public ResponseEntity<SellerProfileDTO> getMyProfile() {
+        enforceSellerRole();
+        String sellerId = getCurrentUserId();
+        log.info("GET /api/profiles/sellers/me - Fetching profile for {}", sellerId);
         SellerProfileDTO profile = profileService.getOrCreateProfile(sellerId);
         return ResponseEntity.ok(profile);
     }
@@ -113,8 +128,37 @@ public class SellerProfileController {
      */
     @PostMapping("/{sellerId}/verify")
     public ResponseEntity<Void> verifySeller(@PathVariable String sellerId) {
+        enforceSellerRole();
+        enforceUserMatch(sellerId);
         log.info("POST /api/profiles/sellers/{}/verify - Verifying seller", sellerId);
         profileService.verifySeller(sellerId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    private String getCurrentUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null || auth.getName().isBlank()) {
+            throw new UnauthorizedException("Authentication required");
+        }
+        return auth.getName();
+    }
+
+    private void enforceSellerRole() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getAuthorities() == null) {
+            throw new UnauthorizedException("Authentication required");
+        }
+
+        boolean isSeller = auth.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_SELLER".equals(authority.getAuthority()));
+        if (!isSeller) {
+            throw new UnauthorizedException("Seller role required");
+        }
+    }
+
+    private void enforceUserMatch(String sellerId) {
+        if (!sellerId.equals(getCurrentUserId())) {
+            throw new UnauthorizedException("Not allowed to manage another seller profile");
+        }
     }
 }
