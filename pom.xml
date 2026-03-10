@@ -168,9 +168,7 @@
                         <exclude>**/*IT.java</exclude>
                     </excludes>
                     <!-- Exclude tests tagged as 'integration' by default. Use -Pintegration to run them. -->
-                    <providerProperties>
-                        <junit.jupiter.tags.exclude>integration</junit.jupiter.tags.exclude>
-                    </providerProperties>
+                    <excludedGroups>integration</excludedGroups>
                     <!-- Preserve any argLine appended by other plugins (eg. JaCoCo prepare-agent) -->
                     <argLine>${argLine}</argLine>
                 </configuration>
@@ -204,7 +202,10 @@
                         <configuration>
                             <dataFile>${project.build.directory}/jacoco.exec</dataFile>
                             <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
-                            <xml>true</xml>
+                            <formats>
+                                <format>XML</format>
+                                <format>HTML</format>
+                            </formats>
                         </configuration>
                     </execution>
                 </executions>
@@ -243,12 +244,10 @@
                                 <include>**/*IntegrationTest.java</include>
                                 <include>**/*IT.java</include>
                             </includes>
-                                        <!-- Ensure the integration profile runs tests tagged 'integration' when active. -->
-                                        <providerProperties>
-                                            <junit.jupiter.tags.include>integration</junit.jupiter.tags.include>
-                                        </providerProperties>
-                                        <!-- Force ANSI/JAnsi for forked integration test JVMs as well -->
-                                        <argLine>-Djansi.force=true -Djansi.passthrough=true -Dspring.output.ansi.enabled=ALWAYS</argLine>
+                            <!-- Ensure the integration profile runs tests tagged 'integration' when active. -->
+                            <groups>integration</groups>
+                            <!-- Force ANSI/JAnsi for forked integration test JVMs as well -->
+                            <argLine>-Djansi.force=true -Djansi.passthrough=true -Dspring.output.ansi.enabled=ALWAYS</argLine>
                         </configuration>
                     </plugin>
                 </plugins>
