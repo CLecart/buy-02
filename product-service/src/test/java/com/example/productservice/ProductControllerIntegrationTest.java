@@ -125,5 +125,51 @@ class ProductControllerIntegrationTest {
         assertThat(total2).isEqualTo(2L);
     }
 
+    @Test
+    void list_filters_category_price_seller_and_stock() throws Exception {
+        var p1 = new com.example.productservice.model.Product("Laptop A", "gaming", new BigDecimal("900"), "seller-a", 3);
+        p1.setCategory("electronics");
+        productRepository.save(p1);
+
+        var p2 = new com.example.productservice.model.Product("Laptop B", "office", new BigDecimal("700"), "seller-b", 0);
+        p2.setCategory("electronics");
+        productRepository.save(p2);
+
+        var p3 = new com.example.productservice.model.Product("Chair", "home", new BigDecimal("120"), "seller-a", 7);
+        p3.setCategory("furniture");
+        productRepository.save(p3);
+
+        assertFilteredCount("http://localhost:" + port + "/api/products?category=electronics&page=0&size=10", 2L);
+        assertFilteredCount("http://localhost:" + port + "/api/products?sellerId=seller-a&page=0&size=10", 2L);
+        assertFilteredCount("http://localhost:" + port + "/api/products?inStock=true&page=0&size=10", 2L);
+
+        ResponseEntity<String> response = rest.getForEntity(
+            "http://localhost:" + port + "/api/products?category=electronics&sellerId=seller-a&inStock=true&page=0&size=10",
+            String.class
+        );
+        String body = Objects.requireNonNull(response.getBody(), "combined-filter response body must not be null");
+        com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+        assertThat(root.get("totalElements").asLong()).isEqualTo(1L);
+        assertThat(root.get("content").get(0).get("name").asText()).isEqualTo("Laptop A");
+    }
+
+    @Test
+    void list_withInvalidPriceRange_returnsBadRequest() {
+        String url = "http://localhost:" + port + "/api/products?minPrice=200&maxPrice=100";
+
+        ResponseEntity<String> response = rest.getForEntity(url, String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(Objects.requireNonNull(response.getBody())).contains("invalid_argument");
+    }
+
+    private void assertFilteredCount(String url, long expectedCount) throws Exception {
+        ResponseEntity<String> response = rest.getForEntity(url, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String body = Objects.requireNonNull(response.getBody(), "filtered response body must not be null");
+        com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+        assertThat(root.get("totalElements").asLong()).isEqualTo(expectedCount);
+    }
+
     
 }
