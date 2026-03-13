@@ -98,6 +98,7 @@ public class OrderController {
             @RequestParam(value = "status", required = false) OrderStatus status,
             Pageable pageable
     ) {
+            enforceSellerRole();
         String sellerId = getCurrentUserId();
         Page<OrderDTO> orders = orderService.getOrdersBySeller(sellerId, pageable, search, status);
         return ResponseEntity.ok(orders);
@@ -140,6 +141,7 @@ public class OrderController {
             Pageable pageable
     ) {
         log.info("GET /api/orders/seller/{} - Fetching orders for seller", sellerId);
+            enforceSellerRole();
         enforceUserMatch(sellerId);
         Page<OrderDTO> orders = orderService.getOrdersBySeller(sellerId, pageable, search, status);
         return ResponseEntity.ok(orders);
@@ -290,6 +292,12 @@ public class OrderController {
         String currentUser = getCurrentUserId();
         if (!userId.equals(currentUser)) {
             throw new UnauthorizedException("Not allowed to access other users' orders");
+        }
+    }
+
+    private void enforceSellerRole() {
+        if (!hasRole("SELLER")) {
+            throw new UnauthorizedException("Seller role required");
         }
     }
 

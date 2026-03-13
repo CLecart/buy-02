@@ -147,7 +147,8 @@ class OrderControllerSimpleTest {
     @Test
     void getMySellerOrders_returnsSellerOrders() {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("seller-1", null));
+                new UsernamePasswordAuthenticationToken("seller-1", null,
+                        List.of(new SimpleGrantedAuthority("ROLE_SELLER"))));
 
         Page<OrderDTO> page = new PageImpl<>(List.of(sampleOrder("order-1", "buyer-1")), 
                 PageRequest.of(0, 10), 1);
@@ -159,6 +160,16 @@ class OrderControllerSimpleTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getContent()).hasSize(1);
     }
+
+        @Test
+        void getMySellerOrders_requiresSellerRole() {
+                SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken("buyer-1", null));
+
+                assertThatThrownBy(() -> controller.getMySellerOrders(null, null, PageRequest.of(0, 10)))
+                                .isInstanceOf(UnauthorizedException.class)
+                                .hasMessageContaining("Seller role required");
+        }
 
     @Test
     void getOrdersByBuyer_enforcesUserMatch() {
@@ -189,12 +200,24 @@ class OrderControllerSimpleTest {
     @Test
     void getOrdersBySeller_enforcesUserMatch() {
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("seller-1", null));
+                new UsernamePasswordAuthenticationToken("seller-1", null,
+                        List.of(new SimpleGrantedAuthority("ROLE_SELLER"))));
         var pageable = PageRequest.of(0, 10);
 
         assertThatThrownBy(() -> controller.getOrdersBySeller("seller-2", null, null, pageable))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("Not allowed to access other users' orders");
+    }
+
+    @Test
+    void getOrdersBySeller_requiresSellerRole() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("buyer-1", null));
+        var pageable = PageRequest.of(0, 10);
+
+        assertThatThrownBy(() -> controller.getOrdersBySeller("buyer-1", null, null, pageable))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Seller role required");
     }
 
     @Test
