@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -187,6 +188,41 @@ public class OrderController {
         Page<OrderDTO> orders = orderService.getOrdersByBuyerAndStatus(buyerId, status, pageable);
         return ResponseEntity.ok(orders);
     }
+
+        /**
+         * Get buyer orders in date range.
+         * GET /api/orders/buyer/{buyerId}/date-range?startDate=...&endDate=...
+         */
+        @GetMapping("/buyer/{buyerId}/date-range")
+        public ResponseEntity<Page<OrderDTO>> getOrdersByBuyerInDateRange(
+                @PathVariable("buyerId") String buyerId,
+                @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startDate,
+                @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endDate,
+                Pageable pageable
+        ) {
+            log.info("GET /api/orders/buyer/{}/date-range - Fetching orders between {} and {}", buyerId, startDate, endDate);
+            enforceUserMatch(buyerId);
+            Page<OrderDTO> orders = orderService.getOrdersByBuyerInDateRange(buyerId, startDate, endDate, pageable);
+            return ResponseEntity.ok(orders);
+        }
+
+        /**
+         * Get seller orders in date range.
+         * GET /api/orders/seller/{sellerId}/date-range?startDate=...&endDate=...
+         */
+        @GetMapping("/seller/{sellerId}/date-range")
+        public ResponseEntity<Page<OrderDTO>> getOrdersBySellerInDateRange(
+                @PathVariable("sellerId") String sellerId,
+                @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startDate,
+                @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endDate,
+                Pageable pageable
+        ) {
+            log.info("GET /api/orders/seller/{}/date-range - Fetching orders between {} and {}", sellerId, startDate, endDate);
+            enforceSellerRole();
+            enforceUserMatch(sellerId);
+            Page<OrderDTO> orders = orderService.getOrdersBySellerInDateRange(sellerId, startDate, endDate, pageable);
+            return ResponseEntity.ok(orders);
+        }
 
     /**
      * Update order status.

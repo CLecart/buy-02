@@ -196,6 +196,31 @@ public class OrderService {
     }
 
     /**
+     * Get buyer orders in a date range.
+     */
+    public Page<OrderDTO> getOrdersByBuyerInDateRange(String buyerId, LocalDateTime startDate,
+                                                       LocalDateTime endDate, Pageable pageable) {
+        validateDateRange(startDate, endDate);
+        log.debug("Fetching orders for buyer {} between {} and {}", buyerId, startDate, endDate);
+        return orderRepository.findByBuyerIdAndCreatedAtBetween(buyerId, startDate, endDate, pageable)
+                .map(this::mapToDTO);
+    }
+
+    /**
+     * Get seller orders in a date range.
+     */
+    public Page<OrderDTO> getOrdersBySellerInDateRange(String sellerId, LocalDateTime startDate,
+                                                        LocalDateTime endDate, Pageable pageable) {
+        validateDateRange(startDate, endDate);
+        Pageable safePageable = java.util.Objects.requireNonNull(pageable, PAGEABLE_REQUIRED);
+        Query query = new Query(new Criteria().andOperator(
+                Criteria.where("items.sellerId").is(sellerId),
+                Criteria.where("createdAt").gte(startDate).lte(endDate)
+        )).with(safePageable);
+        return findOrders(query, safePageable);
+    }
+
+    /**
      * Search buyer orders by keyword and optional status.
      */
     public Page<OrderDTO> getOrdersByBuyer(String buyerId, Pageable pageable, String search, OrderStatus status) {
@@ -386,6 +411,15 @@ public class OrderService {
         }
 
         return new Query(java.util.Objects.requireNonNull(criteria, CRITERIA_REQUIRED));
+    }
+
+    private void validateDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("startDate and endDate are required");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("endDate must be greater than or equal to startDate");
+        }
     }
 
     /**

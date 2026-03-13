@@ -295,6 +295,69 @@ class OrderControllerSimpleTest {
     }
 
     @Test
+    void getOrdersByBuyerInDateRange_returnsOrders() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("buyer-1", null));
+        var pageable = PageRequest.of(0, 10);
+        var startDate = LocalDateTime.now().minusDays(7);
+        var endDate = LocalDateTime.now();
+
+        Page<OrderDTO> page = new PageImpl<>(List.of(sampleOrder("order-1", "buyer-1")), pageable, 1);
+        Mockito.when(orderService.getOrdersByBuyerInDateRange("buyer-1", startDate, endDate, pageable))
+                .thenReturn(page);
+
+        var response = controller.getOrdersByBuyerInDateRange("buyer-1", startDate, endDate, pageable);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(orderService).getOrdersByBuyerInDateRange("buyer-1", startDate, endDate, pageable);
+    }
+
+    @Test
+    void getOrdersByBuyerInDateRange_enforcesUserMatch() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("buyer-1", null));
+        var pageable = PageRequest.of(0, 10);
+        var startDate = LocalDateTime.now().minusDays(7);
+        var endDate = LocalDateTime.now();
+
+        assertThatThrownBy(() -> controller.getOrdersByBuyerInDateRange("buyer-2", startDate, endDate, pageable))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Not allowed to access other users' orders");
+    }
+
+    @Test
+    void getOrdersBySellerInDateRange_requiresSellerRole() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("buyer-1", null));
+        var pageable = PageRequest.of(0, 10);
+        var startDate = LocalDateTime.now().minusDays(7);
+        var endDate = LocalDateTime.now();
+
+        assertThatThrownBy(() -> controller.getOrdersBySellerInDateRange("buyer-1", startDate, endDate, pageable))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("Seller role required");
+    }
+
+    @Test
+    void getOrdersBySellerInDateRange_returnsOrders() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("seller-1", null,
+                        List.of(new SimpleGrantedAuthority("ROLE_SELLER"))));
+        var pageable = PageRequest.of(0, 10);
+        var startDate = LocalDateTime.now().minusDays(7);
+        var endDate = LocalDateTime.now();
+
+        Page<OrderDTO> page = new PageImpl<>(List.of(sampleOrder("order-1", "buyer-1")), pageable, 1);
+        Mockito.when(orderService.getOrdersBySellerInDateRange("seller-1", startDate, endDate, pageable))
+                .thenReturn(page);
+
+        var response = controller.getOrdersBySellerInDateRange("seller-1", startDate, endDate, pageable);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(orderService).getOrdersBySellerInDateRange("seller-1", startDate, endDate, pageable);
+    }
+
+    @Test
     void updateOrderStatus_requiresSellerRole() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("buyer-1", null));
