@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class OrderController {
 
+    private static final String ROLE_SELLER = "SELLER";
+
     private final OrderService orderService;
 
     /**
@@ -296,7 +298,7 @@ public class OrderController {
     }
 
     private void enforceSellerRole() {
-        if (!hasRole("SELLER")) {
+        if (!hasRole(ROLE_SELLER)) {
             throw new UnauthorizedException("Seller role required");
         }
     }
@@ -307,7 +309,7 @@ public class OrderController {
             return;
         }
 
-        if (hasRole("SELLER")) {
+        if (hasRole(ROLE_SELLER)) {
             boolean ownsItem = order.items().stream().anyMatch(item -> currentUser.equals(item.sellerId()));
             if (ownsItem) {
                 return;
@@ -319,7 +321,7 @@ public class OrderController {
 
     private void enforceSellerOwnership(OrderDTO order) {
         String currentUser = getCurrentUserId();
-        if (!hasRole("SELLER")) {
+        if (!hasRole(ROLE_SELLER)) {
             throw new UnauthorizedException("Not allowed to update order status");
         }
 
