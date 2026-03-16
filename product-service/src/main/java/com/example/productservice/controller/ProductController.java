@@ -82,12 +82,14 @@ public class ProductController {
         @RequestParam(name = "minPrice", required = false) java.math.BigDecimal minPrice,
         @RequestParam(name = "maxPrice", required = false) java.math.BigDecimal maxPrice,
         @RequestParam(name = "sellerId", required = false) String sellerId,
-        @RequestParam(name = "inStock", required = false) Boolean inStock
+        @RequestParam(name = "inStock", required = false) Boolean inStock,
+        @RequestParam(name = "sortBy", required = false) String sortBy,
+        @RequestParam(name = "sortDir", required = false) String sortDir
     ) {
         if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
             throw new IllegalArgumentException("minPrice must be less than or equal to maxPrice");
         }
-        ProductSearchRequest filter = new ProductSearchRequest(search, category, minPrice, maxPrice, sellerId, inStock);
+        ProductSearchRequest filter = new ProductSearchRequest(search, category, minPrice, maxPrice, sellerId, inStock, sortBy, sortDir);
         Page<ProductDto> p = productService.listProducts(page, size, filter);
         return ResponseEntity.ok(p);
     }

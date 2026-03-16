@@ -9,6 +9,8 @@ public class ProductSearchRequest {
     private final BigDecimal maxPrice;
     private final String sellerId;
     private final Boolean inStock;
+    private final String sortBy;
+    private final String sortDir;
 
     public ProductSearchRequest(
             String search,
@@ -16,7 +18,9 @@ public class ProductSearchRequest {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             String sellerId,
-            Boolean inStock
+            Boolean inStock,
+            String sortBy,
+            String sortDir
     ) {
         this.search = search;
         this.category = category;
@@ -24,6 +28,8 @@ public class ProductSearchRequest {
         this.maxPrice = maxPrice;
         this.sellerId = sellerId;
         this.inStock = inStock;
+        this.sortBy = sortBy;
+        this.sortDir = sortDir;
     }
 
     public String getSearch() {
@@ -48,5 +54,13 @@ public class ProductSearchRequest {
 
     public Boolean getInStock() {
         return inStock;
+    }
+
+    public String getSortBy() {
+        return sortBy;
+    }
+
+    public String getSortDir() {
+        return sortDir;
     }
 }

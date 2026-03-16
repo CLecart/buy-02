@@ -212,10 +212,12 @@ public class OrderService {
     public Page<OrderDTO> getOrdersBySellerInDateRange(String sellerId, LocalDateTime startDate,
                                                         LocalDateTime endDate, Pageable pageable) {
         validateDateRange(startDate, endDate);
+        LocalDateTime safeStartDate = java.util.Objects.requireNonNull(startDate);
+        LocalDateTime safeEndDate = java.util.Objects.requireNonNull(endDate);
         Pageable safePageable = java.util.Objects.requireNonNull(pageable, PAGEABLE_REQUIRED);
         Query query = new Query(new Criteria().andOperator(
                 Criteria.where("items.sellerId").is(sellerId),
-                Criteria.where("createdAt").gte(startDate).lte(endDate)
+            Criteria.where("createdAt").gte(safeStartDate).lte(safeEndDate)
         )).with(safePageable);
         return findOrders(query, safePageable);
     }

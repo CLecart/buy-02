@@ -6,6 +6,8 @@ import com.example.productservice.repository.ProductRepository;
 import org.junit.jupiter.api.AfterEach;
  
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -153,14 +155,38 @@ class ProductControllerIntegrationTest {
         assertThat(root.get("content").get(0).get("name").asText()).isEqualTo("Laptop A");
     }
 
-    @Test
-    void list_withInvalidPriceRange_returnsBadRequest() {
-        String url = "http://localhost:" + port + "/api/products?minPrice=200&maxPrice=100";
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/api/products?minPrice=200&maxPrice=100",
+            "/api/products?sortBy=createdAt&sortDir=asc",
+            "/api/products?sortBy=price&sortDir=up"
+    })
+    void list_withInvalidQuery_returnsBadRequest(String pathWithQuery) {
+        String url = "http://localhost:" + port + pathWithQuery;
 
         ResponseEntity<String> response = rest.getForEntity(url, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(Objects.requireNonNull(response.getBody())).contains("invalid_argument");
+    }
+
+    @Test
+    void list_sorting_byPriceDesc_returnsExpectedOrder() throws Exception {
+        productRepository.save(new com.example.productservice.model.Product("Low", "d", new BigDecimal("10"), "seller-a", 3));
+        productRepository.save(new com.example.productservice.model.Product("Mid", "d", new BigDecimal("25"), "seller-a", 3));
+        productRepository.save(new com.example.productservice.model.Product("High", "d", new BigDecimal("99"), "seller-a", 3));
+
+        String url = "http://localhost:" + port + "/api/products?sortBy=price&sortDir=desc&page=0&size=10";
+        ResponseEntity<String> response = rest.getForEntity(url, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        String body = Objects.requireNonNull(response.getBody(), "sort response body must not be null");
+        com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+        com.fasterxml.jackson.databind.JsonNode content = root.get("content");
+        assertThat(content.isArray()).isTrue();
+        assertThat(content.get(0).get("name").asText()).isEqualTo("High");
+        assertThat(content.get(1).get("name").asText()).isEqualTo("Mid");
+        assertThat(content.get(2).get("name").asText()).isEqualTo("Low");
     }
 
     private void assertFilteredCount(String url, long expectedCount) throws Exception {

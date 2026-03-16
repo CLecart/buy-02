@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,12 +17,19 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.List;
 
 @Service
 public class ProductService {
 
     private static final String FIELD_PRICE = "price";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_CATEGORY = "category";
+    private static final String FIELD_QUANTITY = "quantity";
+    private static final String FIELD_ID = "id";
+    private static final String SORT_FIELD_ERROR = "Unsupported sortBy value. Allowed: name, price, quantity, category";
+    private static final String SORT_DIR_ERROR = "Unsupported sortDir value. Allowed: asc, desc";
 
     private final ProductRepository productRepository;
     private final ProductEventProducer productEventProducer;
@@ -92,12 +100,51 @@ public class ProductService {
     }
 
     public Page<ProductDto> listProducts(int page, int size, ProductSearchRequest filter) {
-        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size));
+        Sort resolvedSort = java.util.Objects.requireNonNull(resolveSort(filter));
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), resolvedSort);
         Query query = buildFilterQuery(filter).with(pageable);
         long total = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), Product.class);
         List<Product> products = mongoTemplate.find(query, Product.class);
         List<ProductDto> dtos = products.stream().map(this::toDto).toList();
         return new PageImpl<>(java.util.Objects.requireNonNull(dtos), pageable, total);
+    }
+
+    private Sort resolveSort(ProductSearchRequest filter) {
+        if (filter == null || filter.getSortBy() == null || filter.getSortBy().isBlank()) {
+            return Sort.by(Sort.Direction.ASC, FIELD_ID);
+        }
+
+        String normalizedField = filter.getSortBy().trim().toLowerCase(Locale.ROOT);
+        String sortField = switch (normalizedField) {
+            case FIELD_NAME -> FIELD_NAME;
+            case FIELD_PRICE -> FIELD_PRICE;
+            case FIELD_QUANTITY -> FIELD_QUANTITY;
+            case FIELD_CATEGORY -> FIELD_CATEGORY;
+            default -> throw new IllegalArgumentException(SORT_FIELD_ERROR);
+        };
+
+        Sort.Direction direction = resolveDirection(filter.getSortDir());
+        Sort primarySort = Sort.by(sortField);
+        if (Sort.Direction.DESC.equals(direction)) {
+            primarySort = primarySort.descending();
+        } else {
+            primarySort = primarySort.ascending();
+        }
+
+        return primarySort.and(Sort.by(FIELD_ID).ascending());
+    }
+
+    private Sort.Direction resolveDirection(String sortDir) {
+        if (sortDir == null || sortDir.isBlank()) {
+            return Sort.Direction.ASC;
+        }
+        String normalizedDirection = sortDir.trim().toLowerCase(Locale.ROOT);
+        Sort.Direction direction = switch (normalizedDirection) {
+            case "asc" -> Sort.Direction.ASC;
+            case "desc" -> Sort.Direction.DESC;
+            default -> throw new IllegalArgumentException(SORT_DIR_ERROR);
+        };
+        return java.util.Objects.requireNonNull(direction);
     }
 
     private Query buildFilterQuery(
@@ -128,15 +175,15 @@ public class ProductService {
         if (search == null || search.isBlank()) return;
         String pattern = ".*" + java.util.regex.Pattern.quote(search.trim()) + ".*";
         criteriaList.add(new Criteria().orOperator(
-            Criteria.where("name").regex(pattern, "i"),
+            Criteria.where(FIELD_NAME).regex(pattern, "i"),
             Criteria.where("description").regex(pattern, "i"),
-            Criteria.where("category").regex(pattern, "i")
+            Criteria.where(FIELD_CATEGORY).regex(pattern, "i")
         ));
     }
 
     private void addCategoryCriteria(List<Criteria> criteriaList, String category) {
         if (category == null || category.isBlank()) return;
-        criteriaList.add(Criteria.where("category").is(category));
+        criteriaList.add(Criteria.where(FIELD_CATEGORY).is(category));
     }
 
     private void addSellerCriteria(List<Criteria> criteriaList, String sellerId) {
@@ -161,9 +208,9 @@ public class ProductService {
     private void addStockCriteria(List<Criteria> criteriaList, Boolean inStock) {
         if (inStock == null) return;
         if (inStock) {
-            criteriaList.add(Criteria.where("quantity").gt(0));
+            criteriaList.add(Criteria.where(FIELD_QUANTITY).gt(0));
         } else {
-            criteriaList.add(Criteria.where("quantity").lte(0));
+            criteriaList.add(Criteria.where(FIELD_QUANTITY).lte(0));
         }
     }
 
