@@ -22,6 +22,23 @@ Product management microservice for the buy-02 e-commerce platform.
 | PUT    | `/api/products/{id}`              | Update product                | JWT + OWNER  |
 | DELETE | `/api/products/{id}`              | Delete product                | JWT + OWNER  |
 
+### `GET /api/products` Query Parameters
+
+| Name       | Type    | Required | Description                                                          |
+| ---------- | ------- | -------- | -------------------------------------------------------------------- |
+| `page`     | int     | No       | Zero-based page index (default: `0`)                                 |
+| `size`     | int     | No       | Page size (default: `10`)                                            |
+| `search`   | string  | No       | Case-insensitive keyword search on `name`, `description`, `category` |
+| `category` | string  | No       | Exact category filter                                                |
+| `minPrice` | decimal | No       | Minimum price filter                                                 |
+| `maxPrice` | decimal | No       | Maximum price filter                                                 |
+| `sellerId` | string  | No       | Seller/owner filter (`ownerId`)                                      |
+| `inStock`  | boolean | No       | `true` for `quantity > 0`, `false` for `quantity <= 0`               |
+| `sortBy`   | string  | No       | Sort field: `name`, `price`, `quantity`, `category`                  |
+| `sortDir`  | string  | No       | Sort direction: `asc`, `desc` (default: `asc`)                       |
+
+If `minPrice > maxPrice`, or if `sortBy` / `sortDir` are invalid, the API returns `400 Bad Request`.
+
 ## Configuration
 
 | Variable                  | Description        | Default         |
