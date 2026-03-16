@@ -2,6 +2,7 @@ package com.example.shared.model;
 
 import com.example.shared.dto.AuthRequest;
 import com.example.shared.dto.AuthResponse;
+import com.example.shared.exception.ApiError;
 import com.example.shared.dto.UserDto;
 import com.example.shared.kafka.event.ProductCreatedEvent;
 import com.example.shared.kafka.event.ProductDeletedEvent;
@@ -17,6 +18,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ModelAndEventCoverageTest {
+
+    @Test
+    void apiError_constructor_and_getters_work() {
+        ApiError error = new ApiError("invalid_argument", "Bad input");
+
+        assertThat(error.getCode()).isEqualTo("invalid_argument");
+        assertThat(error.getMessage()).isEqualTo("Bad input");
+    }
 
     @Test
     void userDto_constructorWithRoles_setsPrimaryRole() {
@@ -192,5 +201,39 @@ class ModelAndEventCoverageTest {
         assertThat(event.getUserId()).isEqualTo("u2");
         assertThat(event.getUserRole()).isEqualTo("BUYER");
         assertThat(event.toString()).contains("eventId='e1'");
+    }
+
+    @Test
+    void order_allArgsConstructor_getters_setters_and_toString() {
+        Order order = new Order(
+                "o1",
+                "buyer-1",
+                "buyer@test.com",
+                List.of(new OrderItem("p1", "s1", "Product", 2, new BigDecimal("9.99"))),
+                new BigDecimal("19.98"),
+                new BigDecimal("2.00"),
+                OrderStatus.PENDING,
+                PaymentMethod.CREDIT_CARD,
+                "pay-ref",
+                "42 Test Street",
+                "track-1",
+                java.time.LocalDateTime.now().minusDays(1),
+                java.time.LocalDateTime.now(),
+                java.time.LocalDateTime.now().plusDays(3),
+                null,
+                "handle with care"
+        );
+
+        assertThat(order.getId()).isEqualTo("o1");
+        assertThat(order.getBuyerId()).isEqualTo("buyer-1");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(order.getTotalPrice()).isEqualByComparingTo(new BigDecimal("19.98"));
+        assertThat(order.toString()).contains("id='o1'").contains("buyerId='buyer-1'");
+
+        order.setTrackingNumber("track-2");
+        order.setStatus(OrderStatus.CONFIRMED);
+
+        assertThat(order.getTrackingNumber()).isEqualTo("track-2");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
     }
 }
