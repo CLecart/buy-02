@@ -94,6 +94,28 @@ public class ProductController {
         return ResponseEntity.ok(p);
     }
 
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<Page<ProductDto>> listBySeller(
+            @PathVariable("sellerId") String sellerId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", required = false) String sortBy,
+            @RequestParam(name = "sortDir", required = false) String sortDir
+    ) {
+        ProductSearchRequest filter = new ProductSearchRequest(
+                null,
+                null,
+                null,
+                null,
+                sellerId,
+                null,
+                sortBy,
+                sortDir
+        );
+        Page<ProductDto> products = productService.listProducts(page, size, filter);
+        return ResponseEntity.ok(products);
+    }
+
     /**
      * Add a media ID to a product. Only the owner can add media.
      */
