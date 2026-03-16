@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -162,17 +164,38 @@ class ModelAndEventCoverageTest {
         assertThat(created.getProductId()).isEqualTo("p1");
         assertThat(created.getSellerId()).isEqualTo("s1");
         assertThat(created.getName()).isEqualTo("Name");
+        assertThat(created.getDescription()).isEqualTo("Desc");
+        assertThat(created.getPrice()).isEqualByComparingTo(new BigDecimal("12.34"));
+        assertThat(created.getQuantity()).isEqualTo(5);
         assertThat(created.toString()).contains("productId='p1'");
 
-        ProductUpdatedEvent updated = new ProductUpdatedEvent();
-        updated.setProductId("p2");
-        updated.setSellerId("s2");
-        updated.setName("N2");
-        updated.setDescription("D2");
-        updated.setPrice(new BigDecimal("8.99"));
-        updated.setQuantity(9);
+        ProductCreatedEvent defaultCreated = new ProductCreatedEvent();
+        defaultCreated.setProductId("p4");
+        defaultCreated.setSellerId("s4");
+        defaultCreated.setName("N4");
+        defaultCreated.setDescription("D4");
+        defaultCreated.setPrice(new BigDecimal("4.44"));
+        defaultCreated.setQuantity(4);
+        assertThat(defaultCreated.getEventType()).isEqualTo(ProductEvent.EventType.CREATED);
+        assertThat(defaultCreated.toString()).contains("productId='p4'");
+
+        ProductUpdatedEvent updated = new ProductUpdatedEvent("p2", "s2", "N2", "D2",
+            new BigDecimal("8.99"), 9);
         assertThat(updated.getEventType()).isEqualTo(ProductEvent.EventType.UPDATED);
+        assertThat(updated.getDescription()).isEqualTo("D2");
+        assertThat(updated.getPrice()).isEqualByComparingTo(new BigDecimal("8.99"));
+        assertThat(updated.getQuantity()).isEqualTo(9);
         assertThat(updated.toString()).contains("productId='p2'");
+
+        ProductUpdatedEvent defaultUpdated = new ProductUpdatedEvent();
+        defaultUpdated.setProductId("p5");
+        defaultUpdated.setSellerId("s5");
+        defaultUpdated.setName("N5");
+        defaultUpdated.setDescription("D5");
+        defaultUpdated.setPrice(new BigDecimal("5.55"));
+        defaultUpdated.setQuantity(5);
+        assertThat(defaultUpdated.getEventType()).isEqualTo(ProductEvent.EventType.UPDATED);
+        assertThat(defaultUpdated.toString()).contains("productId='p5'");
 
         ProductDeletedEvent deleted = new ProductDeletedEvent("p3", "s3");
         assertThat(deleted.getEventType()).isEqualTo(ProductEvent.EventType.DELETED);
@@ -201,6 +224,51 @@ class ModelAndEventCoverageTest {
         assertThat(event.getUserId()).isEqualTo("u2");
         assertThat(event.getUserRole()).isEqualTo("BUYER");
         assertThat(event.toString()).contains("eventId='e1'");
+    }
+
+    @Test
+    void sellerProfile_allArgsConstructor_and_accessors_work() {
+        LocalDateTime now = LocalDateTime.now();
+        SellerProfile profile = new SellerProfile(
+                "sp1",
+                "seller-1",
+                "Store",
+                "Description",
+                "+33123456789",
+                "1 Main Street",
+                "Paris",
+                "75001",
+                "FR",
+                "LIC-1",
+                12,
+                new BigDecimal("1200.50"),
+                new BigDecimal("100.04"),
+                4.8,
+                7,
+                List.of("p1", "p2"),
+                List.of("p2"),
+                Map.of("p1", 10),
+                now.minusDays(10),
+                now,
+                now.minusDays(1),
+                "logo-1",
+                "banner-1",
+                true
+        );
+
+        assertThat(profile.getId()).isEqualTo("sp1");
+        assertThat(profile.getSellerId()).isEqualTo("seller-1");
+        assertThat(profile.getStoreName()).isEqualTo("Store");
+        assertThat(profile.getTotalRevenue()).isEqualByComparingTo(new BigDecimal("1200.50"));
+        assertThat(profile.getVerified()).isTrue();
+
+        profile.setVerified(false);
+        profile.setStoreName("Updated Store");
+        profile.setAverageRating(4.9);
+
+        assertThat(profile.getVerified()).isFalse();
+        assertThat(profile.getStoreName()).isEqualTo("Updated Store");
+        assertThat(profile.getAverageRating()).isEqualTo(4.9);
     }
 
     @Test
