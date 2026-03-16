@@ -26,6 +26,7 @@ import java.util.Objects;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -128,4 +129,42 @@ class OrderControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(content().json(createdJson));
     }
+
+        @Test
+        void deleteOrder_returnsNoContent() throws Exception {
+                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("buyer-1", null));
+
+                mvc.perform(delete("/api/orders/order-1"))
+                                .andExpect(status().isNoContent());
+
+                Mockito.verify(orderService).deleteOrder("order-1", "buyer-1");
+        }
+
+        @Test
+        void redoOrder_returnsCreated() throws Exception {
+                var redone = new OrderDTO(
+                                "order-redo-1",
+                                "buyer-1",
+                                "buyer@example.com",
+                                List.of(new OrderDTO.OrderItemDTO("prod-1", "seller-1", "Product 1", 1, new BigDecimal("10.00"), new BigDecimal("10.00"))),
+                                new BigDecimal("10.00"),
+                                OrderStatus.PENDING,
+                                PaymentMethod.PAY_ON_DELIVERY,
+                                "",
+                                "Address 1",
+                                null,
+                                LocalDateTime.now(),
+                                LocalDateTime.now()
+                );
+                Mockito.when(orderService.redoOrder("order-1", "buyer-1")).thenReturn(redone);
+
+                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("buyer-1", null));
+
+                String redoneJson = Objects.requireNonNull(mapper.writeValueAsString(redone));
+
+                mvc.perform(post("/api/orders/order-1/redo"))
+                                .andExpect(status().isCreated())
+                                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                                .andExpect(content().json(redoneJson));
+        }
 }
