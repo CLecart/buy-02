@@ -189,6 +189,27 @@ class ProductControllerIntegrationTest {
         assertThat(content.get(2).get("name").asText()).isEqualTo("Low");
     }
 
+    @Test
+    void list_bySellerEndpoint_returnsOnlySellerProducts() throws Exception {
+        productRepository.save(new com.example.productservice.model.Product("Seller A - 1", "d", new BigDecimal("10"), "seller-a", 1));
+        productRepository.save(new com.example.productservice.model.Product("Seller A - 2", "d", new BigDecimal("12"), "seller-a", 2));
+        productRepository.save(new com.example.productservice.model.Product("Seller B - 1", "d", new BigDecimal("20"), "seller-b", 1));
+
+        String url = "http://localhost:" + port + "/api/products/seller/seller-a?page=0&size=10";
+        ResponseEntity<String> response = rest.getForEntity(url, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        String body = Objects.requireNonNull(response.getBody(), "seller listing response body must not be null");
+        com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+        com.fasterxml.jackson.databind.JsonNode content = root.get("content");
+        assertThat(content.isArray()).isTrue();
+        assertThat(root.get("totalElements").asLong()).isEqualTo(2L);
+
+        java.util.List<String> names = new java.util.ArrayList<>();
+        content.forEach(n -> names.add(n.get("name").asText()));
+        assertThat(names).containsExactlyInAnyOrder("Seller A - 1", "Seller A - 2");
+    }
+
     private void assertFilteredCount(String url, long expectedCount) throws Exception {
         ResponseEntity<String> response = rest.getForEntity(url, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
