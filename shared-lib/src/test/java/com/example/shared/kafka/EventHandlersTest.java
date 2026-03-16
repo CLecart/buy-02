@@ -1,6 +1,8 @@
 package com.example.shared.kafka;
 
 import com.example.shared.event.OrderCreatedEvent;
+import com.example.shared.event.CartUpdatedEvent;
+import com.example.shared.event.OrderStatusChangedEvent;
 import com.example.shared.exception.EventProcessingException;
 import com.example.shared.service.SellerProfileService;
 import com.example.shared.service.UserProfileService;
@@ -10,12 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -25,6 +29,9 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 class EventHandlersTest {
+
+        @Mock
+        private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Mock
     private UserProfileService userProfileService;
@@ -181,5 +188,84 @@ class EventHandlersTest {
                 null, 0, BigDecimal.ZERO, 0, BigDecimal.ZERO, java.time.LocalDateTime.now());
 
         assertThatCode(() -> handler.handleCartUpdated(event)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void eventProducer_publishesAllDomainEvents() {
+        EventProducer producer = new EventProducer(kafkaTemplate);
+        OrderCreatedEvent orderCreated = testEvent;
+        OrderStatusChangedEvent statusChanged = new OrderStatusChangedEvent(
+                "order-123",
+                "buyer-1",
+                "buyer@test.com",
+                com.example.shared.model.OrderStatus.PENDING,
+                com.example.shared.model.OrderStatus.CONFIRMED,
+                null,
+                java.time.LocalDateTime.now()
+        );
+        CartUpdatedEvent cartUpdated = new CartUpdatedEvent(
+                "cart-1",
+                "buyer-1",
+                "ITEM_ADDED",
+                "prod-1",
+                2,
+                new BigDecimal("10.00"),
+                2,
+                new BigDecimal("20.00"),
+                java.time.LocalDateTime.now()
+        );
+
+        assertThatNoException().isThrownBy(() -> producer.publishOrderCreated(orderCreated));
+        assertThatNoException().isThrownBy(() -> producer.publishOrderStatusChanged(statusChanged));
+        assertThatNoException().isThrownBy(() -> producer.publishCartUpdated(cartUpdated));
+
+        verify(kafkaTemplate).send("order-created", "order-123", orderCreated);
+        verify(kafkaTemplate).send("order-status-changed", "order-123", statusChanged);
+        verify(kafkaTemplate).send("cart-updated", "cart-1", cartUpdated);
+    }
+
+    @Test
+    void eventProducer_rejectsMissingEventKeys() {
+        EventProducer producer = new EventProducer(kafkaTemplate);
+
+        OrderCreatedEvent invalidOrderCreated = new OrderCreatedEvent(
+                null,
+                "buyer-1",
+                "buyer@test.com",
+                List.of(),
+                BigDecimal.ZERO,
+                "Address 1",
+                java.time.LocalDateTime.now()
+        );
+        OrderStatusChangedEvent invalidStatusChanged = new OrderStatusChangedEvent(
+                null,
+                "buyer-1",
+                "buyer@test.com",
+                com.example.shared.model.OrderStatus.PENDING,
+                com.example.shared.model.OrderStatus.CONFIRMED,
+                null,
+                java.time.LocalDateTime.now()
+        );
+        CartUpdatedEvent invalidCartUpdated = new CartUpdatedEvent(
+                null,
+                "buyer-1",
+                "ITEM_ADDED",
+                "prod-1",
+                1,
+                BigDecimal.ONE,
+                1,
+                BigDecimal.ONE,
+                java.time.LocalDateTime.now()
+        );
+
+        assertThatThrownBy(() -> producer.publishOrderCreated(invalidOrderCreated))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("orderId");
+        assertThatThrownBy(() -> producer.publishOrderStatusChanged(invalidStatusChanged))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("orderId");
+        assertThatThrownBy(() -> producer.publishCartUpdated(invalidCartUpdated))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("cartId");
     }
 }
