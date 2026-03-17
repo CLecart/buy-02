@@ -89,7 +89,15 @@ public class ProductController {
         if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
             throw new IllegalArgumentException("minPrice must be less than or equal to maxPrice");
         }
-        ProductSearchRequest filter = new ProductSearchRequest(search, category, minPrice, maxPrice, sellerId, inStock, sortBy, sortDir);
+        ProductSearchRequest filter = new ProductSearchRequest(
+            search,
+            category,
+            minPrice,
+            maxPrice,
+            sellerId,
+            inStock,
+            new ProductSearchRequest.SortOptions(sortBy, sortDir)
+        );
         Page<ProductDto> p = productService.listProducts(page, size, filter);
         return ResponseEntity.ok(p);
     }
@@ -109,8 +117,7 @@ public class ProductController {
                 null,
                 sellerId,
                 null,
-                sortBy,
-                sortDir
+                new ProductSearchRequest.SortOptions(sortBy, sortDir)
         );
         Page<ProductDto> products = productService.listProducts(page, size, filter);
         return ResponseEntity.ok(products);

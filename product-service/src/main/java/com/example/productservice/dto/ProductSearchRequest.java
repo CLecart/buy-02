@@ -3,14 +3,16 @@ package com.example.productservice.dto;
 import java.math.BigDecimal;
 
 public class ProductSearchRequest {
+    public record SortOptions(String sortBy, String sortDir) {
+    }
+
     private final String search;
     private final String category;
     private final BigDecimal minPrice;
     private final BigDecimal maxPrice;
     private final String sellerId;
     private final Boolean inStock;
-    private final String sortBy;
-    private final String sortDir;
+    private final SortOptions sortOptions;
 
     public ProductSearchRequest(
             String search,
@@ -19,8 +21,7 @@ public class ProductSearchRequest {
             BigDecimal maxPrice,
             String sellerId,
             Boolean inStock,
-            String sortBy,
-            String sortDir
+            SortOptions sortOptions
     ) {
         this.search = search;
         this.category = category;
@@ -28,8 +29,7 @@ public class ProductSearchRequest {
         this.maxPrice = maxPrice;
         this.sellerId = sellerId;
         this.inStock = inStock;
-        this.sortBy = sortBy;
-        this.sortDir = sortDir;
+        this.sortOptions = sortOptions;
     }
 
     public String getSearch() {
@@ -57,10 +57,10 @@ public class ProductSearchRequest {
     }
 
     public String getSortBy() {
-        return sortBy;
+        return sortOptions != null ? sortOptions.sortBy() : null;
     }
 
     public String getSortDir() {
-        return sortDir;
+        return sortOptions != null ? sortOptions.sortDir() : null;
     }
 }

@@ -87,10 +87,10 @@ class ProductServiceIntegrationTest {
     void listProducts_delegatesToRepository_and_searches() {
         productRepository.save(new Product("Apple", "a", BigDecimal.ONE, "o1"));
         productRepository.save(new Product("Banana", "b", BigDecimal.valueOf(2), "o2"));
-        var page = productService.listProducts(0, 10, new ProductSearchRequest(null, null, null, null, null, null, null, null));
+        var page = productService.listProducts(0, 10, new ProductSearchRequest(null, null, null, null, null, null, null));
         assertThat(page.getTotalElements()).isEqualTo(2);
 
-        var search = productService.listProducts(0, 10, new ProductSearchRequest("ap", null, null, null, null, null, null, null));
+        var search = productService.listProducts(0, 10, new ProductSearchRequest("ap", null, null, null, null, null, null));
         assertThat(search.getTotalElements()).isEqualTo(1);
     }
 }
