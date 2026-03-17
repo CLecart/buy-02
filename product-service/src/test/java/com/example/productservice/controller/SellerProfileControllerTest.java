@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -95,6 +96,36 @@ class SellerProfileControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         verify(profileService).verifySeller("seller-1");
+    }
+
+    @Test
+    void getSellersByMinRating_rejectsInvalidRange() {
+        var pageable = PageRequest.of(0, 10);
+
+        assertThatThrownBy(() -> controller.getSellersByMinRating(6.0, pageable))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("minRating must be between 0.0 and 5.0");
+    }
+
+    @Test
+    void getSellersByRevenueRange_rejectsNullBounds() {
+        var pageable = PageRequest.of(0, 10);
+        var maxRevenue = new BigDecimal("10.00");
+
+        assertThatThrownBy(() -> controller.getSellersByRevenueRange(null, maxRevenue, pageable))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("minRevenue and maxRevenue are required");
+    }
+
+    @Test
+    void getSellersByRevenueRange_rejectsInvertedBounds() {
+        var pageable = PageRequest.of(0, 10);
+        var minRevenue = new BigDecimal("20.00");
+        var maxRevenue = new BigDecimal("10.00");
+
+        assertThatThrownBy(() -> controller.getSellersByRevenueRange(minRevenue, maxRevenue, pageable))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("minRevenue must be less than or equal to maxRevenue");
     }
 
     private SellerProfileDTO sampleProfile(String sellerId) {

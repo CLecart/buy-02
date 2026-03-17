@@ -80,6 +80,9 @@ public class SellerProfileController {
             @RequestParam Double minRating,
             Pageable pageable
     ) {
+        if (minRating == null || minRating < 0.0 || minRating > 5.0) {
+            throw new IllegalArgumentException("minRating must be between 0.0 and 5.0");
+        }
         log.info("GET /api/profiles/sellers/analytics/by-rating - Min rating: {}", minRating);
         Page<SellerProfileDTO> sellers = profileService.getSellersByMinRating(minRating, pageable);
         return ResponseEntity.ok(sellers);
@@ -114,6 +117,12 @@ public class SellerProfileController {
             @RequestParam BigDecimal maxRevenue,
             Pageable pageable
     ) {
+        if (minRevenue == null || maxRevenue == null) {
+            throw new IllegalArgumentException("minRevenue and maxRevenue are required");
+        }
+        if (minRevenue.compareTo(maxRevenue) > 0) {
+            throw new IllegalArgumentException("minRevenue must be less than or equal to maxRevenue");
+        }
         log.info("GET /api/profiles/sellers/analytics/by-revenue - Range: {} to {}", minRevenue, maxRevenue);
         Page<SellerProfileDTO> sellers = profileService.getSellersByRevenueRange(minRevenue, maxRevenue, pageable);
         return ResponseEntity.ok(sellers);
