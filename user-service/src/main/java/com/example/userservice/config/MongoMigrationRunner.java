@@ -15,7 +15,10 @@ public class MongoMigrationRunner {
 
     private static final String COLLECTION_USERS = "users";
     private static final String COLLECTION_USER_PROFILES = "user_profiles";
-    private static final String FIELD_USER_ID = "user_id";
+    private static final String FIELD_EMAIL = "email";
+    private static final String FIELD_USER_ID = "userId";
+    private static final String FIELD_TOTAL_ORDERS = "totalOrders";
+    private static final String FIELD_TOTAL_SPENT = "totalSpent";
 
     public MongoMigrationRunner(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
@@ -26,8 +29,18 @@ public class MongoMigrationRunner {
         createCollectionIfMissing(COLLECTION_USERS);
         createCollectionIfMissing(COLLECTION_USER_PROFILES);
 
-        mongoTemplate.indexOps(COLLECTION_USERS).ensureIndex(new Index().on("email", org.springframework.data.domain.Sort.Direction.ASC));
-        mongoTemplate.indexOps(COLLECTION_USER_PROFILES).ensureIndex(new Index().on(FIELD_USER_ID, org.springframework.data.domain.Sort.Direction.ASC));
+        mongoTemplate.indexOps(COLLECTION_USERS).ensureIndex(
+            new Index().on(FIELD_EMAIL, org.springframework.data.domain.Sort.Direction.ASC).unique()
+        );
+        mongoTemplate.indexOps(COLLECTION_USER_PROFILES).ensureIndex(
+            new Index().on(FIELD_USER_ID, org.springframework.data.domain.Sort.Direction.ASC).unique()
+        );
+        mongoTemplate.indexOps(COLLECTION_USER_PROFILES).ensureIndex(
+            new Index().on(FIELD_TOTAL_ORDERS, org.springframework.data.domain.Sort.Direction.DESC)
+        );
+        mongoTemplate.indexOps(COLLECTION_USER_PROFILES).ensureIndex(
+            new Index().on(FIELD_TOTAL_SPENT, org.springframework.data.domain.Sort.Direction.DESC)
+        );
     }
 
     private void createCollectionIfMissing(String name) {
