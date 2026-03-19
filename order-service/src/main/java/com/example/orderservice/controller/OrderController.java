@@ -86,7 +86,7 @@ public class OrderController {
             @RequestParam(value = "status", required = false) OrderStatus status,
             Pageable pageable
     ) {
-        String buyerId = getCurrentUserId();
+        String buyerId = requireAuthenticatedUserId();
         Page<OrderDTO> orders = orderService.getOrdersByBuyer(buyerId, pageable, search, status);
         return ResponseEntity.ok(orders);
     }
@@ -102,7 +102,7 @@ public class OrderController {
             Pageable pageable
     ) {
             enforceSellerRole();
-        String sellerId = getCurrentUserId();
+        String sellerId = requireAuthenticatedUserId();
         Page<OrderDTO> orders = orderService.getOrdersBySeller(sellerId, pageable, search, status);
         return ResponseEntity.ok(orders);
     }
@@ -254,7 +254,7 @@ public class OrderController {
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<OrderDTO> cancelOrder(@PathVariable("orderId") @NonNull String orderId) {
         log.info("PATCH /api/orders/{}/cancel - Cancelling order", orderId);
-        String buyerId = getCurrentUserId();
+        String buyerId = requireAuthenticatedUserId();
         OrderDTO cancelledOrder = orderService.cancelOrder(orderId, buyerId);
         return ResponseEntity.ok(cancelledOrder);
     }
@@ -265,7 +265,7 @@ public class OrderController {
      */
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(@PathVariable("orderId") @NonNull String orderId) {
-        String buyerId = getCurrentUserId();
+        String buyerId = requireAuthenticatedUserId();
         orderService.deleteOrder(orderId, buyerId);
         return ResponseEntity.noContent().build();
     }
@@ -276,7 +276,7 @@ public class OrderController {
      */
     @PostMapping("/{orderId}/redo")
     public ResponseEntity<OrderDTO> redoOrder(@PathVariable("orderId") @NonNull String orderId) {
-        String buyerId = getCurrentUserId();
+        String buyerId = requireAuthenticatedUserId();
         OrderDTO order = orderService.redoOrder(orderId, buyerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
@@ -316,6 +316,14 @@ public class OrderController {
             return "";
         }
         return auth.getName();
+    }
+
+    private String requireAuthenticatedUserId() {
+        String userId = getCurrentUserId();
+        if (userId.isBlank()) {
+            throw new UnauthorizedException("Authentication required");
+        }
+        return userId;
     }
 
     private boolean hasRole(String role) {

@@ -144,6 +144,15 @@ class OrderControllerSimpleTest {
         assertThat(response.getBody().getContent()).hasSize(1);
     }
 
+        @Test
+        void getMyOrders_throwsWhenNotAuthenticated() {
+                SecurityContextHolder.clearContext();
+
+                assertThatThrownBy(() -> controller.getMyOrders(null, null, PageRequest.of(0, 10)))
+                                .isInstanceOf(UnauthorizedException.class)
+                                .hasMessageContaining("Authentication required");
+        }
+
     @Test
     void getMySellerOrders_returnsSellerOrders() {
         SecurityContextHolder.getContext().setAuthentication(
@@ -427,6 +436,15 @@ class OrderControllerSimpleTest {
         verify(orderService).cancelOrder("order-1", "buyer-1");
     }
 
+        @Test
+        void cancelOrder_throwsWhenNotAuthenticated() {
+                SecurityContextHolder.clearContext();
+
+                assertThatThrownBy(() -> controller.cancelOrder("order-1"))
+                                .isInstanceOf(UnauthorizedException.class)
+                                .hasMessageContaining("Authentication required");
+        }
+
     @Test
     void deleteOrder_callsService() {
         SecurityContextHolder.getContext().setAuthentication(
@@ -439,6 +457,15 @@ class OrderControllerSimpleTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(orderService).deleteOrder("order-1", "buyer-1");
     }
+
+        @Test
+        void deleteOrder_throwsWhenNotAuthenticated() {
+                SecurityContextHolder.clearContext();
+
+                assertThatThrownBy(() -> controller.deleteOrder("order-1"))
+                                .isInstanceOf(UnauthorizedException.class)
+                                .hasMessageContaining("Authentication required");
+        }
 
     @Test
     void redoOrder_callsService() {
@@ -453,6 +480,15 @@ class OrderControllerSimpleTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody().id()).isEqualTo("order-new");
     }
+
+        @Test
+        void redoOrder_throwsWhenNotAuthenticated() {
+                SecurityContextHolder.clearContext();
+
+                assertThatThrownBy(() -> controller.redoOrder("order-1"))
+                                .isInstanceOf(UnauthorizedException.class)
+                                .hasMessageContaining("Authentication required");
+        }
 
     @Test
     void countOrdersByBuyer_enforcesUserMatch() {
