@@ -147,8 +147,9 @@ class OrderControllerSimpleTest {
         @Test
         void getMyOrders_throwsWhenNotAuthenticated() {
                 SecurityContextHolder.clearContext();
+                var pageable = PageRequest.of(0, 10);
 
-                assertThatThrownBy(() -> controller.getMyOrders(null, null, PageRequest.of(0, 10)))
+                assertThatThrownBy(() -> controller.getMyOrders(null, null, pageable))
                                 .isInstanceOf(UnauthorizedException.class)
                                 .hasMessageContaining("Authentication required");
         }
@@ -439,8 +440,9 @@ class OrderControllerSimpleTest {
         @Test
         void cancelOrder_throwsWhenNotAuthenticated() {
                 SecurityContextHolder.clearContext();
+                var orderId = "order-1";
 
-                assertThatThrownBy(() -> controller.cancelOrder("order-1"))
+                assertThatThrownBy(() -> controller.cancelOrder(orderId))
                                 .isInstanceOf(UnauthorizedException.class)
                                 .hasMessageContaining("Authentication required");
         }
@@ -461,8 +463,9 @@ class OrderControllerSimpleTest {
         @Test
         void deleteOrder_throwsWhenNotAuthenticated() {
                 SecurityContextHolder.clearContext();
+                var orderId = "order-1";
 
-                assertThatThrownBy(() -> controller.deleteOrder("order-1"))
+                assertThatThrownBy(() -> controller.deleteOrder(orderId))
                                 .isInstanceOf(UnauthorizedException.class)
                                 .hasMessageContaining("Authentication required");
         }
@@ -484,8 +487,9 @@ class OrderControllerSimpleTest {
         @Test
         void redoOrder_throwsWhenNotAuthenticated() {
                 SecurityContextHolder.clearContext();
+                var orderId = "order-1";
 
-                assertThatThrownBy(() -> controller.redoOrder("order-1"))
+                assertThatThrownBy(() -> controller.redoOrder(orderId))
                                 .isInstanceOf(UnauthorizedException.class)
                                 .hasMessageContaining("Authentication required");
         }
